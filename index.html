@@ -516,6 +516,68 @@
                                 </select>
                             </div>
 
+                            <!-- Package Dimensions -->
+                            <div class="form-group">
+                                <label>Package Length (cm) *</label>
+                                <input type="number" id="length" step="0.1" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Package Width (cm) *</label>
+                                <input type="number" id="width" step="0.1" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Package Height (cm) *</label>
+                                <input type="number" id="height" step="0.1" min="0" required>
+                            </div>
+
+                            <!-- Actual Weight -->
+                            <div class="form-group">
+                                <label>Actual Weight (kg) *</label>
+                                <input type="number" id="actualWeight" step="0.01" min="0" required>
+                            </div>
+
+                            <!-- Volumetric Weight (Auto-calculated) -->
+                            <div class="form-group">
+                                <label>Volumetric Weight (kg)</label>
+                                <input type="number" id="volumetricWeight" step="0.01" min="0" readonly style="background: #f0f0f0;">
+                            </div>
+
+                            <!-- Delivery Pincode -->
+                            <div class="form-group">
+                                <label>Delivery Pincode *</label>
+                                <input type="text" id="deliveryPincode" required placeholder="e.g., 400001">
+                            </div>
+
+                            <!-- Shipping Method -->
+                            <div class="form-group">
+                                <label>Shipping Method *</label>
+                                <select id="shippingMethod" required onchange="updateVolumetricWeight()">
+                                    <option value="">Select Method</option>
+                                    <option value="surface">Surface (7x Volume)</option>
+                                    <option value="air">Air (1x Volume)</option>
+                                    <option value="train">Train (7x Volume)</option>
+                                    <option value="express">Express</option>
+                                    <option value="oneday">One Day Delivery</option>
+                                </select>
+                            </div>
+
+                            <!-- Package Image Upload -->
+                            <div class="form-group">
+                                <label>Package Image</label>
+                                <input type="file" id="packageImage" accept="image/*" capture="environment">
+                                <small style="color: #666;">Upload from phone or computer</small>
+                            </div>
+
+                            <!-- Payment Method -->
+                            <div class="form-group">
+                                <label>Payment Method *</label>
+                                <select id="paymentMethod" required onchange="updatePaymentUI()">
+                                    <option value="">Select Payment Method</option>
+                                    <option value="razorpay">Razorpay (Online)</option>
+                                    <option value="cash">Cash on Delivery</option>
+                                </select>
+                            </div>
+
                             <!-- Manual Price Entry -->
                             <div class="form-group">
                                 <label>Order Amount (₹) *</label>
@@ -559,6 +621,7 @@
                                     <th>Service Type</th>
                                     <th>Date</th>
                                     <th>Status</th>
+                                    <th>Transaction ID</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -608,10 +671,23 @@
         <div class="modal-content">
             <h2>Complete Payment</h2>
             <p>Order Amount: <strong id="paymentAmount">₹0</strong></p>
-            <p style="color: #666; font-size: 13px;">Click below to proceed with Razorpay payment</p>
+            <p style="color: #666; font-size: 13px;">Payment Method: <strong id="paymentMethodDisplay">Razorpay</strong></p>
             <div class="btn-group">
-                <button class="btn btn-success" onclick="initiatePayment()">Pay Now with Razorpay</button>
+                <button class="btn btn-success" onclick="initiatePayment()" id="paymentBtn">Pay Now with Razorpay</button>
                 <button class="btn" style="background: #95a5a6; color: var(--white);" onclick="closePaymentModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cash on Delivery Modal -->
+    <div id="codModal" class="modal">
+        <div class="modal-content">
+            <h2>Cash on Delivery</h2>
+            <p>Order Amount: <strong id="codAmount">₹0</strong></p>
+            <p style="color: #666; font-size: 13px;">Customer will pay on delivery</p>
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="confirmCashPayment()">Confirm COD Order</button>
+                <button class="btn" style="background: #95a5a6; color: var(--white);" onclick="closeCodModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -649,12 +725,136 @@
             document.getElementById('orderForm').reset();
         }
 
-        // ========== ORDER MANAGEMENT ==========
-        let orders = [];
-        let currentOrder = null;
+        // ========== VOLUMETRIC WEIGHT CALCULATION ==========
+        function updateVolumetricWeight() {
+            const length = parseFloat(document.getElementById('length').value) || 0;
+            const width = parseFloat(document.getElementById('width').value) || 0;
+            const height = parseFloat(document.getElementById('height').value) || 0;
+            const shippingMethod = document.getElementById('shippingMethod').value;
+
+            if (length && width && height && shippingMethod) {
+                let volume = (length * width * height);
+                let volumetricWeight = 0;
+
+                if (shippingMethod === 'surface' || shippingMethod === 'train') {
+                    volumetricWeight = volume / 27000 * 7;
+                } else if (shippingMethod === 'air') {
+                    volumetricWeight = volume / 5000;
+                } else if (shippingMethod === 'express' || shippingMethod === 'oneday') {
+                    volumetricWeight = volume / 5000;
+                }
+
+                document.getElementById('volumetricWeight').value = volumetricWeight.toFixed(2);
+            }
+        }
+
+        // Update volumetric weight on dimension change
+        document.getElementById('length')?.addEventListener('change', updateVolumetricWeight);
+        document.getElementById('width')?.addEventListener('change', updateVolumetricWeight);
+        document.getElementById('height')?.addEventListener('change', updateVolumetricWeight);
+
+        // ========== PAYMENT UI ==========
+        function updatePaymentUI() {
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            // Can be used to show/hide payment-specific UI
+        }
+
+        // ========== ORDER PRINTING ==========
+        function printOrderSheet(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const printWindow = window.open('', '', 'height=600,width=800');
+            const html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Order Sheet - ${order.id}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+                        .header h1 { margin: 0; color: #8E2A8C; }
+                        .section { margin-bottom: 20px; }
+                        .section h3 { color: #8E2A8C; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+                        .row { display: flex; margin-bottom: 10px; }
+                        .label { width: 30%; font-weight: bold; }
+                        .value { width: 70%; }
+                        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
+                        @media print { body { margin: 0; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>EPS Worldwide</h1>
+                        <p>Order Sheet</p>
+                    </div>
+
+                    <div class="section">
+                        <h3>Order Information</h3>
+                        <div class="row"><div class="label">Order ID:</div><div class="value">${order.id}</div></div>
+                        <div class="row"><div class="label">Date:</div><div class="value">${new Date(order.createdDate).toLocaleDateString('en-IN')}</div></div>
+                        <div class="row"><div class="label">Status:</div><div class="value">${order.status.toUpperCase()}</div></div>
+                        ${order.paymentMethod ? `<div class="row"><div class="label">Payment Method:</div><div class="value">${order.paymentMethod === 'razorpay' ? 'Online (Razorpay)' : 'Cash on Delivery'}</div></div>` : ''}
+                        ${order.transactionId ? `<div class="row"><div class="label">Transaction ID:</div><div class="value">${order.transactionId}</div></div>` : ''}
+                    </div>
+
+                    <div class="section">
+                        <h3>Customer Information</h3>
+                        <div class="row"><div class="label">Name:</div><div class="value">${order.customerName}</div></div>
+                        <div class="row"><div class="label">Email:</div><div class="value">${order.customerEmail}</div></div>
+                        <div class="row"><div class="label">Phone:</div><div class="value">${order.customerPhone}</div></div>
+                        <div class="row"><div class="label">Address:</div><div class="value">${order.customerAddress}</div></div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Shipment Details</h3>
+                        <div class="row"><div class="label">From:</div><div class="value">${order.pickupLocation}</div></div>
+                        <div class="row"><div class="label">To:</div><div class="value">${order.deliveryLocation}</div></div>
+                        ${order.deliveryPincode ? `<div class="row"><div class="label">Delivery Pincode:</div><div class="value">${order.deliveryPincode}</div></div>` : ''}
+                        <div class="row"><div class="label">Service Type:</div><div class="value">${order.serviceType}</div></div>
+                        ${order.shippingMethod ? `<div class="row"><div class="label">Shipping Method:</div><div class="value">${order.shippingMethod.toUpperCase()}</div></div>` : ''}
+                    </div>
+
+                    <div class="section">
+                        <h3>Package Details</h3>
+                        ${order.length ? `<div class="row"><div class="label">Dimensions:</div><div class="value">${order.length} x ${order.width} x ${order.height} cm</div></div>` : ''}
+                        ${order.actualWeight ? `<div class="row"><div class="label">Actual Weight:</div><div class="value">${order.actualWeight} kg</div></div>` : ''}
+                        ${order.volumetricWeight ? `<div class="row"><div class="label">Volumetric Weight:</div><div class="value">${order.volumetricWeight} kg</div></div>` : ''}
+                        <div class="row"><div class="label">Weight:</div><div class="value">${order.weight} kg</div></div>
+                        <div class="row"><div class="label">Description:</div><div class="value">${order.packageDescription || 'N/A'}</div></div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Payment Information</h3>
+                        <div class="row"><div class="label">Amount:</div><div class="value">₹${order.amount.toFixed(2)}</div></div>
+                        <div class="row"><div class="label">Amount Paid:</div><div class="value">₹${order.amountPaid || order.amount.toFixed(2)}</div></div>
+                    </div>
+
+                    <div class="footer">
+                        <p>Printed on: ${new Date().toLocaleString('en-IN')}</p>
+                        <p>This is a computer-generated document. No signature required.</p>
+                    </div>
+
+                    <script>
+                        window.print();
+                    </script>
+                </body>
+                </html>
+            `;
+            printWindow.document.write(html);
+            printWindow.document.close();
+        }
 
         function handleCreateOrder(event) {
             event.preventDefault();
+
+            const packageImage = document.getElementById('packageImage').files[0];
+            const paymentMethod = document.getElementById('paymentMethod').value;
+
+            if (!paymentMethod) {
+                showToast('Please select payment method', 'error');
+                return;
+            }
 
             const orderData = {
                 id: 'ORD' + Date.now(),
@@ -664,11 +864,22 @@
                 customerAddress: document.getElementById('customerAddress').value,
                 pickupLocation: document.getElementById('pickupLocation').value,
                 deliveryLocation: document.getElementById('deliveryLocation').value,
-                weight: document.getElementById('weight').value,
+                deliveryPincode: document.getElementById('deliveryPincode').value,
+                length: document.getElementById('length').value,
+                width: document.getElementById('width').value,
+                height: document.getElementById('height').value,
+                actualWeight: document.getElementById('actualWeight').value,
+                volumetricWeight: document.getElementById('volumetricWeight').value,
+                weight: document.getElementById('actualWeight').value, // For compatibility
                 serviceType: document.getElementById('serviceType').value,
+                shippingMethod: document.getElementById('shippingMethod').value,
                 amount: parseFloat(document.getElementById('orderAmount').value),
+                amountPaid: 0,
                 packageDescription: document.getElementById('packageDescription').value,
                 notes: document.getElementById('orderNotes').value,
+                packageImage: packageImage ? packageImage.name : null,
+                paymentMethod: paymentMethod,
+                transactionId: null,
                 createdBy: currentEmployee.id,
                 createdDate: new Date().toISOString(),
                 status: 'pending'
@@ -676,24 +887,59 @@
 
             currentOrder = orderData;
             document.getElementById('paymentAmount').textContent = '₹' + orderData.amount.toFixed(2);
-            openPaymentModal();
+            
+            if (paymentMethod === 'cash') {
+                // For cash payment, mark as COD
+                showPaymentModal();
+            } else {
+                // For Razorpay, open payment modal
+                openPaymentModal();
+            }
         }
 
         function openPaymentModal() {
+            document.getElementById('paymentMethodDisplay').textContent = 'Razorpay (Online)';
+            document.getElementById('paymentBtn').textContent = 'Pay Now with Razorpay';
             document.getElementById('paymentModal').classList.add('show');
+        }
+
+        function showPaymentModal() {
+            document.getElementById('codAmount').textContent = document.getElementById('paymentAmount').textContent;
+            document.getElementById('codModal').classList.add('show');
         }
 
         function closePaymentModal() {
             document.getElementById('paymentModal').classList.remove('show');
         }
 
+        function closeCodModal() {
+            document.getElementById('codModal').classList.remove('show');
+        }
+
+        function confirmCashPayment() {
+            if (!currentOrder) return;
+
+            currentOrder.status = 'cod';
+            currentOrder.paymentMethod = 'cash';
+            currentOrder.transactionId = 'CASH_' + Date.now();
+            currentOrder.amountPaid = 0;
+            orders.push(currentOrder);
+            
+            localStorage.setItem('orders', JSON.stringify(orders));
+            
+            closeCodModal();
+            document.getElementById('orderForm').reset();
+            showToast('COD Order created successfully! Order ID: ' + currentOrder.id, 'success');
+            loadOrders();
+            switchTab('orders-list');
+        }
+
         function initiatePayment() {
             if (!currentOrder) return;
 
-            // Razorpay payment options
             const options = {
-                key: 'rzp_live_YOUR_KEY_HERE', // Replace with your Razorpay API Key
-                amount: currentOrder.amount * 100, // Amount in paise
+                key: 'rzp_live_YOUR_KEY_HERE',
+                amount: currentOrder.amount * 100,
                 currency: 'INR',
                 name: 'EPS Worldwide',
                 description: `Order #${currentOrder.id}`,
@@ -706,16 +952,17 @@
                 handler: function(response) {
                     if (response.razorpay_payment_id) {
                         currentOrder.status = 'paid';
-                        currentOrder.paymentId = response.razorpay_payment_id;
+                        currentOrder.paymentMethod = 'razorpay';
+                        currentOrder.transactionId = response.razorpay_payment_id;
+                        currentOrder.amountPaid = currentOrder.amount;
                         currentOrder.paidDate = new Date().toISOString();
                         orders.push(currentOrder);
                         
-                        // Save to localStorage (will be replaced with Supabase)
                         localStorage.setItem('orders', JSON.stringify(orders));
                         
                         closePaymentModal();
                         document.getElementById('orderForm').reset();
-                        showToast('Order created successfully! Payment confirmed.', 'success');
+                        showToast('✅ Order created! Transaction ID: ' + response.razorpay_payment_id, 'success');
                         loadOrders();
                         switchTab('orders-list');
                     }
@@ -728,16 +975,18 @@
             };
 
             // For demo: auto-confirm payment
-            if (confirm('Demo Mode: Click OK to simulate payment confirmation')) {
+            if (confirm('Demo Mode: Click OK to simulate Razorpay payment confirmation')) {
                 currentOrder.status = 'paid';
-                currentOrder.paymentId = 'DEMO_' + Date.now();
+                currentOrder.paymentMethod = 'razorpay';
+                currentOrder.transactionId = 'RAZORPAY_' + Date.now();
+                currentOrder.amountPaid = currentOrder.amount;
                 currentOrder.paidDate = new Date().toISOString();
                 orders.push(currentOrder);
                 localStorage.setItem('orders', JSON.stringify(orders));
                 
                 closePaymentModal();
                 document.getElementById('orderForm').reset();
-                showToast('Order created successfully! Payment confirmed (Demo Mode).', 'success');
+                showToast('✅ Order created! Transaction ID: ' + currentOrder.transactionId, 'success');
                 loadOrders();
                 switchTab('orders-list');
             }
@@ -756,7 +1005,7 @@
             const tbody = document.getElementById('ordersTableBody');
             
             if (orders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #999;">No orders yet</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #999;">No orders yet</td></tr>';
                 return;
             }
 
@@ -769,11 +1018,15 @@
                     <td>${new Date(order.createdDate).toLocaleDateString('en-IN')}</td>
                     <td>
                         <span class="status-badge status-${order.status}">
-                            ${capitalizeText(order.status)}
+                            ${order.status === 'cod' ? 'COD' : capitalizeText(order.status)}
                         </span>
                     </td>
                     <td>
-                        <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="viewOrder('${order.id}')">View</button>
+                        ${order.transactionId ? `<small>${order.transactionId}</small>` : 'N/A'}
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" style="padding: 5px 8px; font-size: 11px; margin-right: 3px;" onclick="viewOrder('${order.id}')">View</button>
+                        <button class="btn" style="padding: 5px 8px; font-size: 11px; background: #3498db; color: white;" onclick="printOrderSheet('${order.id}')">Print</button>
                     </td>
                 </tr>
             `).join('');
@@ -825,26 +1078,34 @@
                 'Customer Name': order.customerName,
                 'Customer Email': order.customerEmail,
                 'Customer Phone': order.customerPhone,
+                'Delivery Pincode': order.deliveryPincode || 'N/A',
                 'Pickup Location': order.pickupLocation,
                 'Delivery Location': order.deliveryLocation,
-                'Weight (kg)': order.weight,
+                'Length (cm)': order.length || 'N/A',
+                'Width (cm)': order.width || 'N/A',
+                'Height (cm)': order.height || 'N/A',
+                'Actual Weight (kg)': order.actualWeight || 'N/A',
+                'Volumetric Weight (kg)': order.volumetricWeight || 'N/A',
                 'Service Type': capitalizeText(order.serviceType),
+                'Shipping Method': order.shippingMethod ? capitalizeText(order.shippingMethod) : 'N/A',
                 'Amount (₹)': order.amount,
+                'Amount Paid (₹)': order.amountPaid || 0,
                 'Status': capitalizeText(order.status),
+                'Payment Method': order.paymentMethod === 'razorpay' ? 'Razorpay (Online)' : 'Cash on Delivery',
+                'Transaction ID': order.transactionId || 'N/A',
                 'Created Date': new Date(order.createdDate).toLocaleString('en-IN'),
-                'Payment ID': order.paymentId || 'N/A',
-                'Notes': order.notes
+                'Notes': order.notes || 'N/A'
             }));
 
             const ws = XLSX.utils.json_to_sheet(excelData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Orders');
             
-            // Set column widths
             ws['!cols'] = [
-                {wch: 15}, {wch: 20}, {wch: 25}, {wch: 15},
-                {wch: 20}, {wch: 20}, {wch: 12}, {wch: 20},
-                {wch: 12}, {wch: 12}, {wch: 25}, {wch: 15}, {wch: 20}
+                {wch: 15}, {wch: 20}, {wch: 25}, {wch: 15}, {wch: 12},
+                {wch: 20}, {wch: 20}, {wch: 10}, {wch: 10}, {wch: 10},
+                {wch: 12}, {wch: 14}, {wch: 18}, {wch: 16}, {wch: 12},
+                {wch: 12}, {wch: 12}, {wch: 18}, {wch: 18}, {wch: 20}, {wch: 20}
             ];
 
             XLSX.writeFile(wb, `EPS_Orders_${new Date().toISOString().slice(0, 10)}.xlsx`);
