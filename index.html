@@ -328,13 +328,21 @@ function updateVolumetricWeight() {
     const h = parseFloat(document.getElementById('height').value) || 0;
     const method = document.getElementById('shippingMethod').value;
 
-    if (l && w && h && method) {
+    if (l > 0 && w > 0 && h > 0 && method) {
         let volume = l * w * h;
         let vw = 0;
-        if (method === 'surface' || method === 'train') vw = (volume / 27000) * 7;
-        else if (method === 'air') vw = volume / 5000;
-        else vw = volume / 5000;
+        
+        if (method === 'surface' || method === 'train') {
+            vw = (volume / 27000) * 7;
+        } else if (method === 'air') {
+            vw = volume / 5000;
+        } else if (method === 'express' || method === 'oneday') {
+            vw = volume / 5000;
+        }
+        
         document.getElementById('volumetricWeight').value = vw.toFixed(2);
+    } else {
+        document.getElementById('volumetricWeight').value = '';
     }
 }
 
@@ -547,6 +555,12 @@ function showToast(msg, type = 'info') {
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
+
+// Add event listeners for volumetric weight
+document.getElementById('length')?.addEventListener('input', updateVolumetricWeight);
+document.getElementById('width')?.addEventListener('input', updateVolumetricWeight);
+document.getElementById('height')?.addEventListener('input', updateVolumetricWeight);
+document.getElementById('shippingMethod')?.addEventListener('change', updateVolumetricWeight);
 
 loadOrders();
 </script>
