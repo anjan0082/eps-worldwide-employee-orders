@@ -53,6 +53,9 @@
         .status-paid { background: #d4edda; color: #155724; }
         .status-cod { background: #fff3cd; color: #856404; }
         .status-pending { background: #cce5ff; color: #004085; }
+        .status-confirmed { background: #fff3cd; color: #856404; }
+        .status-shipped { background: #d1ecf1; color: #0c5460; }
+        .status-delivered { background: #d4edda; color: #155724; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); }
         .modal.show { display: flex; align-items: center; justify-content: center; }
         .modal-content { background: var(--white); padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
@@ -355,7 +358,16 @@ function handleCreateOrder(event) {
         transactionId: null,
         createdBy: currentEmployee.id,
         createdDate: new Date().toISOString(),
-        status: 'pending'
+        status: 'pending',
+        statusHistory: [
+            {
+                status: 'pending',
+                changedBy: currentEmployee.id,
+                changedAt: new Date().toISOString(),
+                notes: 'Order created'
+            }
+        ],
+        awbNumber: null
     };
 
     document.getElementById('paymentAmount').textContent = '₹' + currentOrder.amount.toFixed(2);
@@ -393,6 +405,44 @@ function closePaymentModal() {
     document.getElementById('paymentModal').classList.remove('show');
 }
 
+function changeStatus(orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const statusOptions = ['pending', 'confirmed', 'shipped', 'delivered'];
+    const newStatus = prompt(`Current Status: ${order.status}\n\nEnter new status:\npending\nconfirmed\nshipped\ndelivered`, order.status);
+
+    if (newStatus && statusOptions.includes(newStatus) && newStatus !== order.status) {
+        order.statusHistory.push({
+            status: newStatus,
+            changedBy: currentEmployee.id,
+            changedAt: new Date().toISOString(),
+            notes: 'Status updated by ' + currentEmployee.name
+        });
+        order.status = newStatus;
+        localStorage.setItem('orders', JSON.stringify(orders));
+        displayOrders();
+        updateAnalytics();
+        showToast('Status updated to ' + newStatus, 'success');
+    }
+}
+
+function viewStatusHistory(orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (!order || !order.statusHistory) return;
+
+    let historyText = 'Order: ' + order.id + '\n\n=== Status History ===\n\n';
+    order.statusHistory.forEach((h, i) => {
+        const date = new Date(h.changedAt).toLocaleString('en-IN');
+        historyText += (i + 1) + '. ' + h.status.toUpperCase() + '\n';
+        historyText += '   By: ' + h.changedBy + '\n';
+        historyText += '   At: ' + date + '\n';
+        historyText += '   Notes: ' + h.notes + '\n\n';
+    });
+
+    alert(historyText);
+}
+
 // ========== ORDERS ==========
 function loadOrders() {
     const saved = localStorage.getItem('orders');
@@ -418,6 +468,8 @@ function displayOrders() {
             <td><span class="status-badge status-${o.status}">${o.status.toUpperCase()}</span></td>
             <td><small>${o.transactionId || 'N/A'}</small></td>
             <td>
+                <button class="btn btn-primary" style="padding: 5px 8px; font-size: 11px; margin-right: 2px;" onclick="viewStatusHistory('${o.id}')">History</button>
+                <button class="btn btn-primary" style="padding: 5px 8px; font-size: 11px; margin-right: 2px;" onclick="changeStatus('${o.id}')">Update</button>
                 <button class="btn btn-primary" style="padding: 5px 8px; font-size: 11px;" onclick="printOrder('${o.id}')">Print</button>
             </td>
         </tr>
@@ -502,8 +554,10 @@ function downloadExcel() {
         'Shipping': o.shippingMethod,
         'Amount': o.amount,
         'Status': o.status,
+        'AWB Number': o.awbNumber || 'N/A',
         'Payment': o.paymentMethod,
         'Transaction ID': o.transactionId || 'N/A',
+        'Status History': o.statusHistory ? o.statusHistory.map(h => `${h.status} (${new Date(h.changedAt).toLocaleDateString('en-IN')})`).join(' → ') : 'N/A',
         'Date': new Date(o.createdDate).toLocaleString('en-IN')
     }));
 
