@@ -34,7 +34,7 @@
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
         .form-group { display: flex; flex-direction: column; }
         label { font-weight: 600; margin-bottom: 8px; color: var(--text); }
-        input, select, textarea { padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; font-family: inherit; }
+        input, select, textarea { padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; font-family: inherit; background: var(--white); }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(142,42,140,0.1); }
         textarea { resize: vertical; min-height: 80px; }
         .btn { padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s; }
@@ -146,15 +146,15 @@
 
                         <div class="form-group">
                             <label>Package Length (cm) *</label>
-                            <input type="number" id="length" step="0.1" required onchange="updateVolumetricWeight()">
+                            <input type="number" id="length" step="0.1" required>
                         </div>
                         <div class="form-group">
                             <label>Package Width (cm) *</label>
-                            <input type="number" id="width" step="0.1" required onchange="updateVolumetricWeight()">
+                            <input type="number" id="width" step="0.1" required>
                         </div>
                         <div class="form-group">
                             <label>Package Height (cm) *</label>
-                            <input type="number" id="height" step="0.1" required onchange="updateVolumetricWeight()">
+                            <input type="number" id="height" step="0.1" required>
                         </div>
 
                         <div class="form-group">
@@ -162,13 +162,13 @@
                             <input type="number" id="actualWeight" step="0.01" required>
                         </div>
                         <div class="form-group">
-                            <label>Volumetric Weight (kg)</label>
-                            <input type="number" id="volumetricWeight" step="0.01" readonly style="background: #f0f0f0;">
+                            <label>Volumetric Weight (kg) *</label>
+                            <input type="number" id="volumetricWeight" step="0.01" required placeholder="Enter manually">
                         </div>
 
                         <div class="form-group">
                             <label>Shipping Method *</label>
-                            <select id="shippingMethod" required onchange="updateVolumetricWeight()">
+                            <select id="shippingMethod" required>
                                 <option value="">Select Method</option>
                                 <option value="surface">Surface (7x Volume)</option>
                                 <option value="air">Air (1x Volume)</option>
@@ -319,31 +319,6 @@ function handleLogout() {
     currentEmployee = null;
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('mainApp').style.display = 'none';
-}
-
-// ========== VOLUMETRIC WEIGHT ==========
-function updateVolumetricWeight() {
-    const l = parseFloat(document.getElementById('length').value) || 0;
-    const w = parseFloat(document.getElementById('width').value) || 0;
-    const h = parseFloat(document.getElementById('height').value) || 0;
-    const method = document.getElementById('shippingMethod').value;
-
-    if (l > 0 && w > 0 && h > 0 && method) {
-        let volume = l * w * h;
-        let vw = 0;
-        
-        if (method === 'surface' || method === 'train') {
-            vw = (volume / 27000) * 7;
-        } else if (method === 'air') {
-            vw = volume / 5000;
-        } else if (method === 'express' || method === 'oneday') {
-            vw = volume / 5000;
-        }
-        
-        document.getElementById('volumetricWeight').value = vw.toFixed(2);
-    } else {
-        document.getElementById('volumetricWeight').value = '';
-    }
 }
 
 // ========== ORDER CREATION ==========
@@ -556,12 +531,7 @@ function showToast(msg, type = 'info') {
     setTimeout(() => toast.remove(), 3000);
 }
 
-// Add event listeners for volumetric weight
-document.getElementById('length')?.addEventListener('input', updateVolumetricWeight);
-document.getElementById('width')?.addEventListener('input', updateVolumetricWeight);
-document.getElementById('height')?.addEventListener('input', updateVolumetricWeight);
-document.getElementById('shippingMethod')?.addEventListener('change', updateVolumetricWeight);
-
+// Initialize
 loadOrders();
 </script>
 
