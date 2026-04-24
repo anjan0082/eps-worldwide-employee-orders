@@ -410,6 +410,7 @@ function processPayment() {
     document.getElementById('orderForm').reset();
     showToast('✅ Order created! ID: ' + currentOrder.id, 'success');
     loadOrders();
+    updateAnalytics();
     switchTab('orders-list');
 }
 
@@ -531,9 +532,12 @@ function printOrder(orderId) {
 
 function updateAnalytics() {
     const total = orders.length;
-    const paid = orders.filter(o => o.status === 'paid').length;
-    const cod = orders.filter(o => o.status === 'cod').length;
-    const revenue = orders.filter(o => o.status === 'paid').reduce((s, o) => s + o.amount, 0);
+    // Count orders that are paid (either status 'paid' or payment method is 'razorpay')
+    const paid = orders.filter(o => o.paymentMethod === 'razorpay' || o.status === 'paid').length;
+    // Count COD orders
+    const cod = orders.filter(o => o.paymentMethod === 'cash' || o.status === 'cod').length;
+    // Calculate revenue from paid orders only
+    const revenue = orders.filter(o => o.paymentMethod === 'razorpay' || o.status === 'paid').reduce((s, o) => s + (o.amount || 0), 0);
 
     document.getElementById('totalOrders').textContent = total;
     document.getElementById('totalRevenue').textContent = '₹' + revenue.toFixed(2);
