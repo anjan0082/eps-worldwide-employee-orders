@@ -144,6 +144,10 @@
                             <input type="text" id="deliveryLocation" required>
                         </div>
                         <div class="form-group">
+                            <label>Delivery Address *</label>
+                            <textarea id="deliveryAddress" rows="3" required placeholder="Enter full delivery address" style="padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; font-size: 14px;"></textarea>
+                        </div>
+                        <div class="form-group">
                             <label>Delivery Pincode *</label>
                             <input type="text" id="deliveryPincode" required>
                         </div>
@@ -186,10 +190,10 @@
                             <label>Service Type *</label>
                             <select id="serviceType" required>
                                 <option value="">Select Service</option>
-                                <option value="domestic">Domestic Courier</option>
-                                <option value="international-export">International Export</option>
-                                <option value="international-import">International Import</option>
-                                <option value="warehousing">Warehousing & Storage</option>
+                                <option value="domestic-parcel">Domestic Parcel</option>
+                                <option value="domestic-documents">Domestic Documents</option>
+                                <option value="international-parcel">International Parcel</option>
+                                <option value="international-documents">International Documents</option>
                             </select>
                         </div>
 
@@ -343,6 +347,7 @@ function handleCreateOrder(event) {
         customerAddress: document.getElementById('customerAddress').value,
         pickupLocation: document.getElementById('pickupLocation').value,
         deliveryLocation: document.getElementById('deliveryLocation').value,
+        deliveryAddress: document.getElementById('deliveryAddress').value,
         deliveryPincode: document.getElementById('deliveryPincode').value,
         length: document.getElementById('length').value,
         width: document.getElementById('width').value,
@@ -545,6 +550,7 @@ function downloadExcel() {
         'Delivery Pincode': o.deliveryPincode,
         'From': o.pickupLocation,
         'To': o.deliveryLocation,
+        'Delivery Address': o.deliveryAddress,
         'Length (cm)': o.length,
         'Width (cm)': o.width,
         'Height (cm)': o.height,
