@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPS Worldwide - Employee Order Management</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #8E2A8C;
+            --dark: #6B1F6B;
+            --light: #A12A8F;
+            --gold: #D4AF37;
+            --white: #fff;
+            --text: #333;
+            --light-bg: #f5f5f5;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { background: linear-gradient(135deg, var(--primary) 0%, var(--light) 100%); color: var(--white); padding: 30px; border-radius: 10px; margin-bottom: 30px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 28px; }
+        .logout-btn { background: var(--gold); color: var(--primary); border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 600; }
+        .logout-btn:hover { background: #E0B200; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #ddd; }
+        .tab-btn { background: var(--white); color: var(--text); border: none; padding: 15px 25px; cursor: pointer; font-weight: 600; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .form-section { background: var(--white); padding: 30px; border-radius: 10px; box-shadow: var(--shadow); margin-bottom: 30px; }
+        .form-section h2 { color: var(--primary); margin-bottom: 20px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; }
+        label { font-weight: 600; margin-bottom: 8px; color: var(--text); }
+        input, select, textarea { padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; font-family: inherit; background: var(--white); }
+        #volumetricWeight { background: var(--white) !important; color: var(--text) !important; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(142,42,140,0.1); }
+        textarea { resize: vertical; min-height: 80px; }
+        .btn { padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s; }
+        .btn-primary { background: var(--primary); color: var(--white); }
+        .btn-primary:hover { background: var(--dark); transform: translateY(-2px); }
+        .btn-success { background: #27ae60; color: var(--white); }
+        .btn-success:hover { background: #229954; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .table-responsive { overflow-x: auto; background: var(--white); border-radius: 10px; box-shadow: var(--shadow); padding: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: var(--primary); color: var(--white); padding: 15px; text-align: left; font-weight: 600; }
+        td { padding: 12px 15px; border-bottom: 1px solid #eee; }
+        tr:hover { background: var(--light-bg); }
+        .status-badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .status-paid { background: #d4edda; color: #155724; }
+        .status-cod { background: #fff3cd; color: #856404; }
+        .status-pending { background: #cce5ff; color: #004085; }
+        .status-confirmed { background: #fff3cd; color: #856404; }
+        .status-shipped { background: #d1ecf1; color: #0c5460; }
+        .status-delivered { background: #d4edda; color: #155724; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); }
+        .modal.show { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: var(--white); padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .modal-content h2 { color: var(--primary); margin-bottom: 20px; }
+        .login-container { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .login-box { background: var(--white); padding: 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 100%; max-width: 400px; }
+        .login-box h1 { color: var(--primary); margin-bottom: 10px; text-align: center; }
+        .login-box p { text-align: center; color: #666; margin-bottom: 30px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: var(--white); padding: 20px; border-radius: 10px; box-shadow: var(--shadow); border-left: 4px solid var(--primary); }
+        .stat-card h3 { color: #666; font-size: 13px; margin-bottom: 10px; }
+        .stat-card .value { color: var(--primary); font-size: 28px; font-weight: 700; }
+        .toast { position: fixed; bottom: 20px; right: 20px; padding: 15px 20px; border-radius: 5px; color: var(--white); font-weight: 600; z-index: 9999; }
+        .toast.success { background: #27ae60; }
+        .toast.error { background: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-container">
+    <div class="login-box">
+        <h1>EPS Worldwide</h1>
+        <p>Employee Order Management System</p>
+        <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label>Employee ID</label>
+                <input type="text" id="employeeId" placeholder="Enter your ID" required>
+            </div>
+            <div class="form-group" style="margin-top: 15px;">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 25px;">Login</button>
+        </form>
+        <p style="margin-top: 20px; font-size: 12px; text-align: center;">Demo: EMP001 / password123</p>
+    </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display: none;">
+    <div class="container">
+        <header>
+            <div>
+                <h1>📦 Order Management</h1>
+                <p>Welcome, <span id="employeeName">Employee</span></p>
+            </div>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('create-order', event)">Create Order</button>
+            <button class="tab-btn" onclick="switchTab('orders-list', event)">View Orders</button>
+            <button class="tab-btn" onclick="switchTab('analytics', event)">Analytics</button>
+        </div>
+
+        <!-- CREATE ORDER TAB -->
+        <div id="create-order" class="tab-content active">
+            <div class="form-section">
+                <h2>Create New Order</h2>
+                <form id="orderForm" onsubmit="handleCreateOrder(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Order Created By *</label>
+                            <input type="text" id="createdByName" required placeholder="Enter your name">
+                        </div>
+                        <div class="form-group">
+                            <label>Customer Name *</label>
+                            <input type="text" id="customerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Customer Email *</label>
+                            <input type="email" id="customerEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Customer Phone *</label>
+                            <input type="tel" id="customerPhone" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Customer Address *</label>
+                            <textarea id="customerAddress" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Pickup Location *</label>
+                            <input type="text" id="pickupLocation" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Delivery Location *</label>
+                            <input type="text" id="deliveryLocation" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Delivery Address *</label>
+                            <textarea id="deliveryAddress" rows="3" required placeholder="Enter full delivery address" style="padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; font-size: 14px;"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Delivery Pincode *</label>
+                            <input type="text" id="deliveryPincode" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Package Length (cm) *</label>
+                            <input type="number" id="length" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Package Width (cm) *</label>
+                            <input type="number" id="width" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Package Height (cm) *</label>
+                            <input type="number" id="height" step="0.1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Actual Weight (kg) *</label>
+                            <input type="number" id="actualWeight" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Volumetric Weight (kg) *</label>
+                            <input type="number" id="volumetricWeight" step="0.01" required placeholder="Enter manually">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Shipping Method *</label>
+                            <select id="shippingMethod" required>
+                                <option value="">Select Method</option>
+                                <option value="surface">Surface</option>
+                                <option value="air">Air</option>
+                                <option value="train">Train</option>
+                                <option value="express">Express</option>
+                                <option value="oneday">One Day</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Service Type *</label>
+                            <select id="serviceType" required>
+                                <option value="">Select Service</option>
+                                <option value="domestic-parcel">Domestic Parcel</option>
+                                <option value="domestic-documents">Domestic Documents</option>
+                                <option value="international-parcel">International Parcel</option>
+                                <option value="international-documents">International Documents</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Package Image</label>
+                            <input type="file" id="packageImage" accept="image/*" capture="environment">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Payment Method *</label>
+                            <select id="paymentMethod" required>
+                                <option value="">Select Method</option>
+                                <option value="razorpay">Razorpay</option>
+                                <option value="cash">Cash</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Order Amount (₹) *</label>
+                            <input type="number" id="orderAmount" step="0.01" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Package Description</label>
+                            <textarea id="packageDescription"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Notes</label>
+                            <textarea id="orderNotes"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">Proceed to Payment</button>
+                        <button type="reset" class="btn" style="background: #95a5a6; color: var(--white);">Clear</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ORDERS LIST TAB -->
+        <div id="orders-list" class="tab-content">
+            <div class="form-section">
+                <h2>All Orders</h2>
+                <div style="margin-bottom: 20px;">
+                    <button class="btn btn-success" onclick="downloadExcel()">📥 Download Excel</button>
+                    <button class="btn btn-primary" onclick="reloadOrders()" style="margin-left: 10px;">🔄 Refresh</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>EPS Ref Code</th>
+                                <th>Customer</th>
+                                <th>Amount (₹)</th>
+                                <th>Service</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Transaction ID</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <tr><td colspan="9" style="text-align: center;">No orders yet</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYTICS TAB -->
+        <div id="analytics" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Orders</h3>
+                    <div class="value" id="totalOrders">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Revenue</h3>
+                    <div class="value" id="totalRevenue">₹0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Paid Orders</h3>
+                    <div class="value" id="paidOrders">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>COD Orders</h3>
+                    <div class="value" id="codOrders">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div id="paymentModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle">Complete Payment</h2>
+        <p>Order Amount: <strong id="paymentAmount">₹0</strong></p>
+        <p id="paymentMethodDisplay" style="color: #666; font-size: 13px;"></p>
+        <div class="btn-group">
+            <button class="btn btn-success" id="paymentBtn" onclick="processPayment()">Pay Now</button>
+            <button class="btn" style="background: #95a5a6; color: var(--white);" onclick="closePaymentModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentEmployee = null;
+let orders = [];
+let currentOrder = null;
+
+// ========== AUTHENTICATION ==========
+function handleLogin(event) {
+    event.preventDefault();
+    const id = document.getElementById('employeeId').value;
+    const pwd = document.getElementById('password').value;
+
+    if (id === 'EMP001' && pwd === 'password123') {
+        currentEmployee = { id, name: 'Rajesh Kumar', email: 'rajesh@epsworldwide.in' };
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        document.getElementById('employeeName').textContent = currentEmployee.name;
+        loadOrders();
+    } else {
+        showToast('Invalid credentials', 'error');
+    }
+}
+
+function handleLogout() {
+    currentEmployee = null;
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('mainApp').style.display = 'none';
+}
+
+// ========== ORDER CREATION ==========
+function handleCreateOrder(event) {
+    event.preventDefault();
+
+    const paymentMethod = document.getElementById('paymentMethod').value;
+    if (!paymentMethod) {
+        showToast('Select payment method', 'error');
+        return;
+    }
+
+    currentOrder = {
+        id: 'ORD' + Date.now(),
+        customerName: document.getElementById('customerName').value,
+        customerEmail: document.getElementById('customerEmail').value,
+        customerPhone: document.getElementById('customerPhone').value,
+        customerAddress: document.getElementById('customerAddress').value,
+        pickupLocation: document.getElementById('pickupLocation').value,
+        deliveryLocation: document.getElementById('deliveryLocation').value,
+        deliveryAddress: document.getElementById('deliveryAddress').value,
+        deliveryPincode: document.getElementById('deliveryPincode').value,
+        length: document.getElementById('length').value,
+        width: document.getElementById('width').value,
+        height: document.getElementById('height').value,
+        actualWeight: document.getElementById('actualWeight').value,
+        volumetricWeight: document.getElementById('volumetricWeight').value,
+        serviceType: document.getElementById('serviceType').value,
+        shippingMethod: document.getElementById('shippingMethod').value,
+        amount: parseFloat(document.getElementById('orderAmount').value),
+        packageDescription: document.getElementById('packageDescription').value,
+        notes: document.getElementById('orderNotes').value,
+        paymentMethod: paymentMethod,
+        transactionId: null,
+        createdBy: currentEmployee.id,
+        createdByName: document.getElementById('createdByName').value,
+        createdDate: new Date().toISOString(),
+        epsReferenceCode: 'EPS' + Math.floor(Math.random() * 100000).toString().padStart(5, '0'),
+        status: 'pending',
+        statusHistory: [
+            {
+                status: 'pending',
+                changedBy: currentEmployee.id,
+                changedAt: new Date().toISOString(),
+                notes: 'Order created'
+            }
+        ],
+        awbNumber: null
+    };
+
+    document.getElementById('paymentAmount').textContent = '₹' + currentOrder.amount.toFixed(2);
+    document.getElementById('paymentMethodDisplay').textContent = paymentMethod === 'razorpay' ? 'Razorpay (Online)' : 'Cash on Delivery';
+    document.getElementById('paymentBtn').textContent = paymentMethod === 'razorpay' ? 'Pay with Razorpay' : 'Confirm COD';
+    document.getElementById('modalTitle').textContent = paymentMethod === 'razorpay' ? 'Complete Payment' : 'Cash on Delivery';
+    document.getElementById('paymentModal').classList.add('show');
+}
+
+function processPayment() {
+    if (!currentOrder) return;
+
+    if (currentOrder.paymentMethod === 'cash') {
+        currentOrder.status = 'cod';
+        currentOrder.transactionId = 'CASH_' + Date.now();
+    } else {
+        if (confirm('Demo: Click OK to confirm Razorpay payment')) {
+            currentOrder.status = 'paid';
+            currentOrder.transactionId = 'RAZORPAY_' + Date.now();
+        } else {
+            return;
+        }
+    }
+
+    orders.push(currentOrder);
+    localStorage.setItem('orders', JSON.stringify(orders));
+    closePaymentModal();
+    document.getElementById('orderForm').reset();
+    showToast('✅ Order created! ID: ' + currentOrder.id, 'success');
+    loadOrders();
+    updateAnalytics();
+    switchTab('orders-list');
+}
+
+function closePaymentModal() {
+    document.getElementById('paymentModal').classList.remove('show');
+}
+
+function changeStatus(orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const statusOptions = ['pending', 'confirmed', 'shipped', 'delivered'];
+    const newStatus = prompt(`Current Status: ${order.status}\n\nEnter new status:\npending\nconfirmed\nshipped\ndelivered`, order.status);
+
+    if (newStatus && statusOptions.includes(newStatus) && newStatus !== order.status) {
+        order.statusHistory.push({
+            status: newStatus,
+            changedBy: currentEmployee.id,
+            changedAt: new Date().toISOString(),
+            notes: 'Status updated by ' + currentEmployee.name
+        });
+        order.status = newStatus;
+        localStorage.setItem('orders', JSON.stringify(orders));
+        displayOrders();
+        updateAnalytics();
+        showToast('Status updated to ' + newStatus, 'success');
+    }
+}
+
+function viewStatusHistory(orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (!order || !order.statusHistory) return;
+
+    let historyText = 'Order: ' + order.id + '\n\n=== Status History ===\n\n';
+    order.statusHistory.forEach((h, i) => {
+        const date = new Date(h.changedAt).toLocaleString('en-IN');
+        historyText += (i + 1) + '. ' + h.status.toUpperCase() + '\n';
+        historyText += '   By: ' + h.changedBy + '\n';
+        historyText += '   At: ' + date + '\n';
+        historyText += '   Notes: ' + h.notes + '\n\n';
+    });
+
+    alert(historyText);
+}
+
+// ========== ORDERS ==========
+function loadOrders() {
+    const saved = localStorage.getItem('orders');
+    if (saved) orders = JSON.parse(saved);
+    displayOrders();
+    updateAnalytics();
+}
+
+function displayOrders() {
+    const tbody = document.getElementById('ordersTableBody');
+    if (orders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No orders</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = orders.map(o => `
+        <tr>
+            <td><strong>${o.id}</strong></td>
+            <td><strong style="color: #D4AF37;">${o.epsReferenceCode}</strong></td>
+            <td>${o.customerName}</td>
+            <td>₹${o.amount.toFixed(2)}</td>
+            <td>${o.serviceType}</td>
+            <td>${new Date(o.createdDate).toLocaleDateString('en-IN')}</td>
+            <td><span class="status-badge status-${o.status}">${o.status.toUpperCase()}</span></td>
+            <td><small>${o.transactionId || 'N/A'}</small></td>
+            <td>
+                <button class="btn btn-primary" style="padding: 5px 8px; font-size: 11px; margin-right: 2px;" onclick="viewStatusHistory('${o.id}')">History</button>
+                <button class="btn btn-primary" style="padding: 5px 8px; font-size: 11px; margin-right: 2px;" onclick="changeStatus('${o.id}')">Update</button>
+                <button class="btn btn-primary" style="padding: 5px 8px; font-size: 11px;" onclick="printOrder('${o.id}')">Print</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function printOrder(orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const w = window.open('', '', 'height=600,width=800');
+    let html = '<!DOCTYPE html><html><head><style>';
+    html += 'body { font-family: Arial; margin: 20px; }';
+    html += '.header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; }';
+    html += '.section { margin: 20px 0; }';
+    html += '.row { display: flex; margin: 10px 0; }';
+    html += '.label { width: 35%; font-weight: bold; }';
+    html += '@media print { body { margin: 0; } }';
+    html += '</style></head><body>';
+    html += '<div class="header"><h1>EPS Worldwide</h1><p>Order Sheet - ' + order.id + '</p></div>';
+    html += '<div class="section"><h3>Order Info</h3>';
+    html += '<div class="row"><div class="label">Order ID:</div><div>' + order.id + '</div></div>';
+    html += '<div class="row"><div class="label">EPS Reference Code:</div><div style="color: #D4AF37; font-weight: 600; font-size: 16px;">' + order.epsReferenceCode + '</div></div>';
+    html += '<div class="row"><div class="label">Order Created By:</div><div><strong>' + order.createdByName + '</strong></div></div>';
+    html += '<div class="row"><div class="label">Status:</div><div>' + order.status.toUpperCase() + '</div></div>';
+    html += '<div class="row"><div class="label">Payment:</div><div>' + (order.paymentMethod === 'razorpay' ? 'Online' : 'COD') + '</div></div>';
+    html += '<div class="row"><div class="label">Transaction:</div><div>' + (order.transactionId || 'N/A') + '</div></div></div>';
+    html += '<div class="section"><h3>Customer</h3>';
+    html += '<div class="row"><div class="label">Name:</div><div>' + order.customerName + '</div></div>';
+    html += '<div class="row"><div class="label">Email:</div><div>' + order.customerEmail + '</div></div>';
+    html += '<div class="row"><div class="label">Phone:</div><div>' + order.customerPhone + '</div></div>';
+    html += '<div class="row"><div class="label">Address:</div><div>' + order.customerAddress + '</div></div></div>';
+    html += '<div class="section"><h3>Shipment</h3>';
+    html += '<div class="row"><div class="label">From:</div><div>' + order.pickupLocation + '</div></div>';
+    html += '<div class="row"><div class="label">To:</div><div>' + order.deliveryLocation + '</div></div>';
+    html += '<div class="row"><div class="label">Delivery Address:</div><div>' + order.deliveryAddress + '</div></div>';
+    html += '<div class="row"><div class="label">Pincode:</div><div>' + order.deliveryPincode + '</div></div></div>';
+    html += '<div class="section"><h3>Package</h3>';
+    html += '<div class="row"><div class="label">Dimensions:</div><div>' + order.length + ' x ' + order.width + ' x ' + order.height + ' cm</div></div>';
+    html += '<div class="row"><div class="label">Weight:</div><div>' + order.actualWeight + ' kg (Actual) / ' + order.volumetricWeight + ' kg (Vol.)</div></div>';
+    html += '<div class="row"><div class="label">Amount:</div><div>₹' + order.amount.toFixed(2) + '</div></div></div>';
+    html += '<script>window.print();<\/script></body></html>';
+    w.document.write(html);
+    w.document.close();
+}
+
+function updateAnalytics() {
+    const total = orders.length;
+    // Count orders that are paid (either status 'paid' or payment method is 'razorpay')
+    const paid = orders.filter(o => o.paymentMethod === 'razorpay' || o.status === 'paid').length;
+    // Count COD orders
+    const cod = orders.filter(o => o.paymentMethod === 'cash' || o.status === 'cod').length;
+    // Calculate revenue from paid orders only
+    const revenue = orders.filter(o => o.paymentMethod === 'razorpay' || o.status === 'paid').reduce((s, o) => s + (o.amount || 0), 0);
+
+    document.getElementById('totalOrders').textContent = total;
+    document.getElementById('totalRevenue').textContent = '₹' + revenue.toFixed(2);
+    document.getElementById('paidOrders').textContent = paid;
+    document.getElementById('codOrders').textContent = cod;
+}
+
+function reloadOrders() {
+    loadOrders();
+    showToast('Refreshed', 'success');
+}
+
+// ========== EXCEL EXPORT ==========
+function downloadExcel() {
+    if (orders.length === 0) {
+        showToast('No orders to export', 'error');
+        return;
+    }
+
+    const data = orders.map(o => ({
+        'Order ID': o.id,
+        'EPS Reference Code': o.epsReferenceCode,
+        'Created By': o.createdByName,
+        'Customer': o.customerName,
+        'Email': o.customerEmail,
+        'Phone': o.customerPhone,
+        'Delivery Pincode': o.deliveryPincode,
+        'From': o.pickupLocation,
+        'To': o.deliveryLocation,
+        'Delivery Address': o.deliveryAddress,
+        'Length (cm)': o.length,
+        'Width (cm)': o.width,
+        'Height (cm)': o.height,
+        'Weight (kg)': o.actualWeight,
+        'Vol. Weight (kg)': o.volumetricWeight,
+        'Service': o.serviceType,
+        'Shipping': o.shippingMethod,
+        'Amount': o.amount,
+        'Status': o.status,
+        'AWB Number': o.awbNumber || 'N/A',
+        'Payment': o.paymentMethod,
+        'Transaction ID': o.transactionId || 'N/A',
+        'Status History': o.statusHistory ? o.statusHistory.map(h => `${h.status} (${new Date(h.changedAt).toLocaleDateString('en-IN')})`).join(' → ') : 'N/A',
+        'Date': new Date(o.createdDate).toLocaleString('en-IN')
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Orders');
+    XLSX.writeFile(wb, `EPS_Orders_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    showToast('Excel downloaded', 'success');
+}
+
+// ========== UI ==========
+function switchTab(name, evt) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(name).classList.add('active');
+    if (evt) evt.target.classList.add('active');
+    if (name === 'orders-list') loadOrders();
+    if (name === 'analytics') updateAnalytics();
+}
+
+function showToast(msg, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// Initialize
+loadOrders();
+</script>
+
+</body>
+</html>
