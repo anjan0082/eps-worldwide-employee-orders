@@ -518,6 +518,7 @@ function printOrder(orderId) {
     html += '<div class="section"><h3>Shipment</h3>';
     html += '<div class="row"><div class="label">From:</div><div>' + order.pickupLocation + '</div></div>';
     html += '<div class="row"><div class="label">To:</div><div>' + order.deliveryLocation + '</div></div>';
+    html += '<div class="row"><div class="label">Delivery Address:</div><div>' + order.deliveryAddress + '</div></div>';
     html += '<div class="row"><div class="label">Pincode:</div><div>' + order.deliveryPincode + '</div></div></div>';
     html += '<div class="section"><h3>Package</h3>';
     html += '<div class="row"><div class="label">Dimensions:</div><div>' + order.length + ' x ' + order.width + ' x ' + order.height + ' cm</div></div>';
