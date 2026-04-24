@@ -119,6 +119,10 @@
                 <form id="orderForm" onsubmit="handleCreateOrder(event)">
                     <div class="form-grid">
                         <div class="form-group">
+                            <label>Order Created By *</label>
+                            <input type="text" id="createdByName" required placeholder="Enter your name">
+                        </div>
+                        <div class="form-group">
                             <label>Customer Name *</label>
                             <input type="text" id="customerName" required>
                         </div>
@@ -247,6 +251,7 @@
                         <thead>
                             <tr>
                                 <th>Order ID</th>
+                                <th>EPS Ref Code</th>
                                 <th>Customer</th>
                                 <th>Amount (₹)</th>
                                 <th>Service</th>
@@ -257,7 +262,7 @@
                             </tr>
                         </thead>
                         <tbody id="ordersTableBody">
-                            <tr><td colspan="8" style="text-align: center;">No orders yet</td></tr>
+                            <tr><td colspan="9" style="text-align: center;">No orders yet</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -362,7 +367,9 @@ function handleCreateOrder(event) {
         paymentMethod: paymentMethod,
         transactionId: null,
         createdBy: currentEmployee.id,
+        createdByName: document.getElementById('createdByName').value,
         createdDate: new Date().toISOString(),
+        epsReferenceCode: 'EPS' + Math.floor(Math.random() * 100000).toString().padStart(5, '0'),
         status: 'pending',
         statusHistory: [
             {
@@ -459,13 +466,14 @@ function loadOrders() {
 function displayOrders() {
     const tbody = document.getElementById('ordersTableBody');
     if (orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No orders</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No orders</td></tr>';
         return;
     }
 
     tbody.innerHTML = orders.map(o => `
         <tr>
             <td><strong>${o.id}</strong></td>
+            <td><strong style="color: #D4AF37;">${o.epsReferenceCode}</strong></td>
             <td>${o.customerName}</td>
             <td>₹${o.amount.toFixed(2)}</td>
             <td>${o.serviceType}</td>
@@ -497,6 +505,8 @@ function printOrder(orderId) {
     html += '<div class="header"><h1>EPS Worldwide</h1><p>Order Sheet - ' + order.id + '</p></div>';
     html += '<div class="section"><h3>Order Info</h3>';
     html += '<div class="row"><div class="label">Order ID:</div><div>' + order.id + '</div></div>';
+    html += '<div class="row"><div class="label">EPS Reference Code:</div><div style="color: #D4AF37; font-weight: 600; font-size: 16px;">' + order.epsReferenceCode + '</div></div>';
+    html += '<div class="row"><div class="label">Order Created By:</div><div><strong>' + order.createdByName + '</strong></div></div>';
     html += '<div class="row"><div class="label">Status:</div><div>' + order.status.toUpperCase() + '</div></div>';
     html += '<div class="row"><div class="label">Payment:</div><div>' + (order.paymentMethod === 'razorpay' ? 'Online' : 'COD') + '</div></div>';
     html += '<div class="row"><div class="label">Transaction:</div><div>' + (order.transactionId || 'N/A') + '</div></div></div>';
@@ -544,6 +554,8 @@ function downloadExcel() {
 
     const data = orders.map(o => ({
         'Order ID': o.id,
+        'EPS Reference Code': o.epsReferenceCode,
+        'Created By': o.createdByName,
         'Customer': o.customerName,
         'Email': o.customerEmail,
         'Phone': o.customerPhone,
