@@ -7,354 +7,62 @@
   <script src="https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
       --primary: #8E2A8C;
       --primary-dark: #6B1F6B;
-      --accent: #E0B200;
-      --success: #10B981;
-      --danger: #EF4444;
       --bg: #F9FAFB;
       --surface: #FFFFFF;
       --text: #1F2937;
       --text-light: #6B7280;
       --border: #E5E7EB;
     }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    .header {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: white;
-      padding: 40px 20px;
-      border-radius: 8px;
-      margin-bottom: 30px;
-      text-align: center;
-    }
-
-    .header h1 {
-      font-size: 28px;
-      margin-bottom: 10px;
-    }
-
-    .header p {
-      font-size: 14px;
-      opacity: 0.9;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 30px;
-      border-bottom: 2px solid var(--border);
-    }
-
-    .tab-btn {
-      padding: 12px 20px;
-      border: none;
-      background: none;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-light);
-      border-bottom: 3px solid transparent;
-      transition: all 0.3s;
-    }
-
-    .tab-btn.active {
-      color: var(--primary);
-      border-bottom-color: var(--primary);
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: var(--text);
-      font-size: 14px;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 14px;
-      font-family: inherit;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(142, 42, 140, 0.1);
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
-    .form-row-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 20px;
-    }
-
-    .radio-group {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    .radio-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .radio-option input[type="radio"] {
-      width: auto;
-      margin: 0;
-    }
-
-    .cheque-field {
-      display: none;
-    }
-
-    .cheque-field.show {
-      display: block;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.3s;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-      width: 100%;
-      padding: 15px;
-      font-size: 16px;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background: var(--primary-dark);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .btn-primary:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .table-container {
-      background: var(--surface);
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th {
-      background: var(--bg);
-      padding: 15px;
-      text-align: left;
-      font-weight: 600;
-      color: var(--text);
-      border-bottom: 2px solid var(--border);
-      font-size: 12px;
-      text-transform: uppercase;
-    }
-
-    td {
-      padding: 15px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    tr:hover {
-      background: var(--bg);
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .badge-pending {
-      background: #FEF3C7;
-      color: #92400E;
-    }
-
-    .badge-confirmed {
-      background: #DBEAFE;
-      color: #0C2340;
-    }
-
-    .badge-shipped {
-      background: #DDD6FE;
-      color: #3730A3;
-    }
-
-    .badge-delivered {
-      background: #D1FAE5;
-      color: #065F46;
-    }
-
-    .alert {
-      padding: 15px;
-      border-radius: 6px;
-      margin-bottom: 20px;
-      display: none;
-    }
-
-    .alert.show {
-      display: block;
-    }
-
-    .alert-success {
-      background: #D1FAE5;
-      color: #065F46;
-      border: 1px solid #10B981;
-    }
-
-    .alert-error {
-      background: #FEE2E2;
-      color: #7F1D1D;
-      border: 1px solid #EF4444;
-    }
-
-    .alert-info {
-      background: #DBEAFE;
-      color: #0C2340;
-      border: 1px solid #3B82F6;
-    }
-
-    .card {
-      background: var(--surface);
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
-    }
-
-    .card-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 15px;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: var(--text-light);
-    }
-
-    .spinner {
-      border: 4px solid var(--border);
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 10px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .analytics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-    }
-
-    .metric-card {
-      background: var(--surface);
-      padding: 20px;
-      border-radius: 8px;
-      border-left: 4px solid var(--primary);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .metric-label {
-      font-size: 12px;
-      color: var(--text-light);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .metric-value {
-      font-size: 24px;
-      font-weight: bold;
-      color: var(--primary);
-    }
-
-    @media (max-width: 768px) {
-      .form-row, .form-row-3 {
-        grid-template-columns: 1fr;
-      }
-      .header h1 {
-        font-size: 20px;
-      }
-      .radio-group {
-        flex-direction: column;
-      }
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 40px 20px; border-radius: 8px; margin-bottom: 30px; text-align: center; }
+    .header h1 { font-size: 28px; margin-bottom: 10px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid var(--border); }
+    .tab-btn { padding: 12px 20px; border: none; background: none; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-light); border-bottom: 3px solid transparent; transition: all 0.3s; }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .form-group { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text); font-size: 14px; }
+    input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; font-family: inherit; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(142, 42, 140, 0.1); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    .radio-group { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+    .radio-option { display: flex; align-items: center; gap: 8px; }
+    .radio-option input[type="radio"] { width: auto; margin: 0; }
+    .cheque-field { display: none; }
+    .cheque-field.show { display: block; }
+    .btn { background: var(--primary); color: white; width: 100%; padding: 15px; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+    .btn:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+    .alert { padding: 15px; border-radius: 6px; margin-bottom: 20px; display: none; }
+    .alert.show { display: block; }
+    .alert-success { background: #D1FAE5; color: #065F46; border: 1px solid #10B981; }
+    .alert-error { background: #FEE2E2; color: #7F1D1D; border: 1px solid #EF4444; }
+    .card { background: var(--surface); padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); margin-bottom: 20px; }
+    .card-title { font-size: 16px; font-weight: 600; color: var(--primary); margin-bottom: 15px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: var(--bg); padding: 15px; text-align: left; font-weight: 600; border-bottom: 2px solid var(--border); font-size: 12px; text-transform: uppercase; }
+    td { padding: 15px; border-bottom: 1px solid var(--border); }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-pending { background: #FEF3C7; color: #92400E; }
+    .badge-confirmed { background: #DBEAFE; color: #0C2340; }
+    .metric-card { background: var(--surface); padding: 20px; border-radius: 8px; border-left: 4px solid var(--primary); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+    .metric-value { font-size: 24px; font-weight: bold; color: var(--primary); }
+    .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+    @media (max-width: 768px) { .form-row, .form-row-3 { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <h1>📦 EPS Worldwide - Employee Order Portal</h1>
-      <p>Backend Connected • Razorpay Integration • Production Ready</p>
+      <p>Razorpay Payment Integration</p>
     </div>
 
     <div id="alert" class="alert"></div>
@@ -369,58 +77,55 @@
       <div class="card">
         <div class="card-title">Create New Order</div>
 
-        <h3 style="margin-top: 20px; margin-bottom: 15px; color: var(--primary); font-size: 14px;">Employee Information</h3>
+        <h3 style="margin: 20px 0 15px; color: var(--primary); font-size: 14px;">Employee Information</h3>
         <div class="form-row">
           <div class="form-group">
             <label>Employee ID</label>
-            <input type="text" id="employeeId" placeholder="e.g., EMP001" value="EMP001">
+            <input type="text" id="employeeId" value="EMP001">
           </div>
           <div class="form-group">
             <label>Employee Name</label>
-            <input type="text" id="employeeName" placeholder="Your name" value="John Doe">
+            <input type="text" id="employeeName" value="John Doe">
           </div>
         </div>
 
-        <h3 style="margin-top: 20px; margin-bottom: 15px; color: var(--primary); font-size: 14px;">Customer Information</h3>
+        <h3 style="margin: 20px 0 15px; color: var(--primary); font-size: 14px;">Customer Information</h3>
         <div class="form-row">
           <div class="form-group">
             <label>Customer Name *</label>
-            <input type="text" id="customerName" placeholder="Full name" required>
+            <input type="text" id="customerName" required>
           </div>
           <div class="form-group">
             <label>Customer Email *</label>
-            <input type="email" id="customerEmail" placeholder="email@example.com" required>
+            <input type="email" id="customerEmail" required>
           </div>
         </div>
-
         <div class="form-group">
           <label>Customer Phone *</label>
-          <input type="tel" id="customerPhone" placeholder="10-digit number" required>
+          <input type="tel" id="customerPhone" required>
         </div>
 
-        <h3 style="margin-top: 20px; margin-bottom: 15px; color: var(--primary); font-size: 14px;">Pickup & Delivery Details</h3>
+        <h3 style="margin: 20px 0 15px; color: var(--primary); font-size: 14px;">Pickup & Delivery</h3>
         <div class="form-group">
           <label>Pickup Address *</label>
-          <textarea id="pickupAddress" placeholder="Full pickup address" rows="2" required></textarea>
+          <textarea id="pickupAddress" rows="2" required></textarea>
         </div>
-
         <div class="form-row">
           <div class="form-group">
             <label>Pickup Pincode</label>
-            <input type="text" id="pickupPincode" placeholder="6-digit pincode">
+            <input type="text" id="pickupPincode">
           </div>
           <div class="form-group">
             <label>Delivery Pincode *</label>
-            <input type="text" id="deliveryPincode" placeholder="6-digit pincode" required>
+            <input type="text" id="deliveryPincode" required>
           </div>
         </div>
-
         <div class="form-group">
           <label>Delivery Address *</label>
-          <textarea id="deliveryAddress" placeholder="Full delivery address" rows="2" required></textarea>
+          <textarea id="deliveryAddress" rows="2" required></textarea>
         </div>
 
-        <h3 style="margin-top: 20px; margin-bottom: 15px; color: var(--primary); font-size: 14px;">Service & Shipping</h3>
+        <h3 style="margin: 20px 0 15px; color: var(--primary); font-size: 14px;">Service & Shipping</h3>
         <div class="form-row">
           <div class="form-group">
             <label>Service Type *</label>
@@ -445,39 +150,37 @@
           </div>
         </div>
 
-        <h3 style="margin-top: 20px; margin-bottom: 15px; color: var(--primary); font-size: 14px;">Package Dimensions</h3>
+        <h3 style="margin: 20px 0 15px; color: var(--primary); font-size: 14px;">Package Details</h3>
         <div class="form-row-3">
           <div class="form-group">
             <label>Length (cm)</label>
-            <input type="number" id="packageLength" placeholder="0.00" step="0.01">
+            <input type="number" id="packageLength" step="0.01">
           </div>
           <div class="form-group">
             <label>Breadth (cm)</label>
-            <input type="number" id="packageBreadth" placeholder="0.00" step="0.01">
+            <input type="number" id="packageBreadth" step="0.01">
           </div>
           <div class="form-group">
             <label>Height (cm)</label>
-            <input type="number" id="packageHeight" placeholder="0.00" step="0.01">
+            <input type="number" id="packageHeight" step="0.01">
           </div>
         </div>
-
         <div class="form-row">
           <div class="form-group">
             <label>Actual Weight (kg)</label>
-            <input type="number" id="packageWeight" placeholder="0.00" step="0.01">
+            <input type="number" id="packageWeight" step="0.01">
           </div>
           <div class="form-group">
             <label>Volumetric Weight (kg)</label>
-            <input type="number" id="volumetricWeight" placeholder="0.00" step="0.01">
+            <input type="number" id="volumetricWeight" step="0.01">
           </div>
         </div>
 
-        <h3 style="margin-top: 20px; margin-bottom: 15px; color: var(--primary); font-size: 14px;">Payment Details</h3>
+        <h3 style="margin: 20px 0 15px; color: var(--primary); font-size: 14px;">Payment Details</h3>
         <div class="form-group">
           <label>Order Amount (₹) *</label>
-          <input type="number" id="orderAmount" placeholder="0.00" step="0.01" required>
+          <input type="number" id="orderAmount" step="0.01" required>
         </div>
-
         <div class="form-group">
           <label>Payment Method *</label>
           <div class="radio-group">
@@ -499,44 +202,35 @@
             </div>
           </div>
         </div>
-
         <div class="cheque-field form-group">
           <label>Cheque Number</label>
-          <input type="text" id="chequeNumber" placeholder="e.g., 123456789">
+          <input type="text" id="chequeNumber">
         </div>
-
         <div class="form-group">
           <label>Additional Notes</label>
-          <textarea id="notes" placeholder="Any special instructions..." rows="2"></textarea>
+          <textarea id="notes" rows="2"></textarea>
         </div>
 
-        <button class="btn btn-primary" onclick="createOrder()">✅ Create Order</button>
+        <button class="btn" onclick="createOrder()">✅ Create Order</button>
       </div>
     </div>
 
     <div id="my-orders" class="tab-content">
       <div class="card">
         <div class="card-title">Your Orders</div>
-        <div id="ordersTable" class="loading">
-          <div class="spinner"></div>
-          Loading orders...
-        </div>
+        <div id="ordersTable">Loading...</div>
       </div>
     </div>
 
     <div id="analytics" class="tab-content">
-      <div class="analytics-grid" id="analyticsGrid">
-        <div class="loading">
-          <div class="spinner"></div>
-          Loading analytics...
-        </div>
-      </div>
+      <div class="analytics-grid" id="analyticsGrid">Loading...</div>
     </div>
   </div>
 
   <script>
     const API_URL = 'https://eps-backend-api.vercel.app';
     const RAZORPAY_KEY = 'rzp_live_ShG1B8BUg7cDW2';
+    let currentOrder = null;
 
     function switchTab(e, tabName) {
       e.preventDefault();
@@ -549,48 +243,14 @@
     }
 
     function toggleChequeField() {
-      const chequeField = document.querySelector('.cheque-field');
-      const isCheque = document.getElementById('cheque').checked;
-      chequeField.classList.toggle('show', isCheque);
+      document.querySelector('.cheque-field').classList.toggle('show', document.getElementById('cheque').checked);
     }
 
     async function createOrder() {
-      if (!document.getElementById('customerName').value) {
-        showAlert('❌ Please fill in Customer Name', 'error');
-        return;
-      }
-      if (!document.getElementById('customerEmail').value) {
-        showAlert('❌ Please fill in Customer Email', 'error');
-        return;
-      }
-      if (!document.getElementById('customerPhone').value) {
-        showAlert('❌ Please fill in Customer Phone', 'error');
-        return;
-      }
-      if (!document.getElementById('serviceType').value) {
-        showAlert('❌ Please select Service Type', 'error');
-        return;
-      }
-      if (!document.getElementById('shippingMethod').value) {
-        showAlert('❌ Please select Shipping Method', 'error');
-        return;
-      }
-      if (!document.getElementById('deliveryPincode').value) {
-        showAlert('❌ Please fill in Delivery Pincode', 'error');
-        return;
-      }
-      if (!document.getElementById('orderAmount').value) {
-        showAlert('❌ Please fill in Order Amount', 'error');
-        return;
-      }
+      if (!validateForm()) return;
 
       const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
       
-      if (paymentMethod === 'cheque' && !document.getElementById('chequeNumber').value) {
-        showAlert('❌ Please fill in Cheque Number', 'error');
-        return;
-      }
-
       const order = {
         eps_reference_code: `EPS${Math.random().toString().slice(2, 7)}`,
         employee_id: document.getElementById('employeeId').value,
@@ -618,33 +278,46 @@
 
       try {
         const response = await axios.post(`${API_URL}/api/orders`, order);
-        const createdOrder = response.data;
+        currentOrder = response.data;
 
         if (paymentMethod === 'razorpay') {
-          initiateRazorpayPayment(createdOrder);
+          openRazorpayPayment(currentOrder);
         } else if (paymentMethod === 'cash') {
-          showAlert(`✅ Order created! Cash confirmed. Reference: ${createdOrder.eps_reference_code}`, 'success');
+          showAlert(`✅ Order created! Reference: ${currentOrder.eps_reference_code}`, 'success');
           clearForm();
         } else if (paymentMethod === 'payment_later') {
-          showAlert(`📧 Payment link sent to ${createdOrder.customer_email}. Reference: ${createdOrder.eps_reference_code}`, 'success');
+          showAlert(`📧 Order created! Payment link sent. Reference: ${currentOrder.eps_reference_code}`, 'success');
           clearForm();
         } else if (paymentMethod === 'cheque') {
-          showAlert(`✅ Order created! Cheque #${document.getElementById('chequeNumber').value} recorded. Reference: ${createdOrder.eps_reference_code}`, 'success');
+          showAlert(`✅ Order created! Cheque recorded. Reference: ${currentOrder.eps_reference_code}`, 'success');
           clearForm();
         }
       } catch (error) {
-        console.error('Error:', error);
         showAlert(`❌ Error: ${error.response?.data?.error || error.message}`, 'error');
       }
     }
 
-    async function initiateRazorpayPayment(order) {
+    async function openRazorpayPayment(order) {
       try {
-        // Use Razorpay directly without backend order creation
+        // Step 1: Create Razorpay order on backend
+        const razorpayRes = await axios.post(`${API_URL}/api/razorpay/create-order`, {
+          amount: order.order_amount,
+          receipt: order.eps_reference_code,
+          customer_email: order.customer_email,
+          customer_name: order.customer_name
+        });
+
+        if (!razorpayRes.data.success) {
+          showAlert(`❌ Error: ${razorpayRes.data.error}`, 'error');
+          return;
+        }
+
+        // Step 2: Open Razorpay modal
         const options = {
           key: RAZORPAY_KEY,
-          amount: Math.round(order.order_amount * 100), // Amount in paise
-          currency: 'INR',
+          order_id: razorpayRes.data.razorpay_order_id,
+          amount: razorpayRes.data.amount,
+          currency: razorpayRes.data.currency,
           name: 'EPS Worldwide',
           description: `Order ${order.eps_reference_code}`,
           prefill: {
@@ -655,13 +328,12 @@
           theme: {
             color: '#8E2A8C'
           },
-          handler: async function(response) {
-            // Payment successful - confirm in backend
-            await confirmPayment(order.id, response.razorpay_payment_id);
+          handler: function(response) {
+            verifyPayment(order.id, response, razorpayRes.data.razorpay_order_id);
           },
           modal: {
             ondismiss: function() {
-              showAlert('⚠️ Payment cancelled. Order created but payment pending.', 'info');
+              showAlert('⚠️ Payment cancelled', 'error');
             }
           }
         };
@@ -669,33 +341,49 @@
         const rzp = new Razorpay(options);
         rzp.open();
       } catch (error) {
-        console.error('Razorpay Error:', error);
+        console.error('Error:', error);
         showAlert(`❌ Payment Error: ${error.message}`, 'error');
       }
     }
 
-    async function confirmPayment(orderId, razorpayPaymentId) {
+    async function verifyPayment(orderId, response, razorpayOrderId) {
       try {
-        const response = await axios.post(`${API_URL}/api/orders/payment/confirm`, {
-          orderId: orderId,
-          razorpayPaymentId: razorpayPaymentId
+        const verifyRes = await axios.post(`${API_URL}/api/razorpay/verify`, {
+          order_id: orderId,
+          razorpay_order_id: razorpayOrderId,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature
         });
 
-        showAlert(`✅ Payment successful! Order confirmed.`, 'success');
-        clearForm();
-        setTimeout(() => loadOrders(), 1000);
+        if (verifyRes.data.success) {
+          showAlert(`✅ Payment successful! Order confirmed.`, 'success');
+          clearForm();
+          setTimeout(() => loadOrders(), 1000);
+        }
       } catch (error) {
-        console.error('Confirmation Error:', error);
-        showAlert(`⚠️ Payment processed successfully!`, 'info');
-        clearForm();
+        showAlert(`❌ Verification failed: ${error.message}`, 'error');
       }
+    }
+
+    function validateForm() {
+      const required = ['customerName', 'customerEmail', 'customerPhone', 'pickupAddress', 'deliveryAddress', 'deliveryPincode', 'serviceType', 'shippingMethod', 'orderAmount'];
+      for (let field of required) {
+        if (!document.getElementById(field).value) {
+          showAlert(`❌ Please fill all required fields`, 'error');
+          return false;
+        }
+      }
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+      if (paymentMethod === 'cheque' && !document.getElementById('chequeNumber').value) {
+        showAlert(`❌ Please fill Cheque Number`, 'error');
+        return false;
+      }
+      return true;
     }
 
     function clearForm() {
       document.querySelectorAll('input, select, textarea').forEach(el => {
-        if (el.id !== 'employeeId' && el.id !== 'employeeName') {
-          el.value = '';
-        }
+        if (el.id !== 'employeeId' && el.id !== 'employeeName') el.value = '';
       });
       document.getElementById('razorpay').checked = true;
       document.querySelector('.cheque-field').classList.remove('show');
@@ -705,53 +393,18 @@
       try {
         const response = await axios.get(`${API_URL}/api/orders`);
         const orders = response.data;
-
         if (!orders || orders.length === 0) {
-          document.getElementById('ordersTable').innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">No orders created yet</p>';
+          document.getElementById('ordersTable').innerHTML = '<p style="text-align: center; padding: 40px;">No orders</p>';
           return;
         }
-
-        let html = `
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Reference Code</th>
-                  <th>Customer</th>
-                  <th>Service</th>
-                  <th>Amount</th>
-                  <th>Payment</th>
-                  <th>Status</th>
-                  <th>Created</th>
-                </tr>
-              </thead>
-              <tbody>
-        `;
-
-        orders.forEach(order => {
-          let paymentDisplay = '';
-          if (order.payment_method === 'razorpay') paymentDisplay = '💳 Razorpay';
-          else if (order.payment_method === 'cash') paymentDisplay = '💰 Cash';
-          else if (order.payment_method === 'cheque') paymentDisplay = '✓ Cheque';
-          else if (order.payment_method === 'payment_later') paymentDisplay = '📧 Later';
-
-          html += `
-            <tr>
-              <td><strong>${order.eps_reference_code || 'N/A'}</strong></td>
-              <td>${order.customer_name || 'N/A'}</td>
-              <td>${order.service_type || 'N/A'}</td>
-              <td>₹${order.order_amount || 0}</td>
-              <td>${paymentDisplay}</td>
-              <td><span class="badge badge-${order.order_status}">${order.order_status || 'pending'}</span></td>
-              <td>${order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}</td>
-            </tr>
-          `;
+        let html = '<div style="overflow-x:auto;"><table><thead><tr><th>Reference</th><th>Customer</th><th>Service</th><th>Amount</th><th>Payment</th><th>Status</th></tr></thead><tbody>';
+        orders.forEach(o => {
+          html += `<tr><td>${o.eps_reference_code}</td><td>${o.customer_name}</td><td>${o.service_type}</td><td>₹${o.order_amount}</td><td>${o.payment_method}</td><td><span class="badge badge-${o.order_status}">${o.order_status}</span></td></tr>`;
         });
-
-        html += `</tbody></table></div>`;
+        html += '</tbody></table></div>';
         document.getElementById('ordersTable').innerHTML = html;
       } catch (error) {
-        document.getElementById('ordersTable').innerHTML = `<p style="color: red; padding: 20px;">Error loading orders: ${error.message}</p>`;
+        document.getElementById('ordersTable').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
       }
     }
 
@@ -759,41 +412,15 @@
       try {
         const response = await axios.get(`${API_URL}/api/analytics/dashboard`);
         const data = response.data;
-
-        const delivered = data.orders_by_status?.delivered || 0;
-        const total = data.total_orders || 0;
-        const successRate = total > 0 ? ((delivered / total) * 100).toFixed(1) : 0;
-
         let html = `
-          <div class="metric-card">
-            <div class="metric-label">Total Orders</div>
-            <div class="metric-value">${data.total_orders || 0}</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Total Revenue</div>
-            <div class="metric-value">₹${(data.total_revenue || 0).toFixed(0)}</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Delivered</div>
-            <div class="metric-value">${delivered}</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Success Rate</div>
-            <div class="metric-value">${successRate}%</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Pending Orders</div>
-            <div class="metric-value">${data.orders_by_status?.pending || 0}</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Paid Orders</div>
-            <div class="metric-value">${data.paid_orders || 0}</div>
-          </div>
+          <div class="metric-card"><div class="metric-value">${data.total_orders || 0}</div><div>Total Orders</div></div>
+          <div class="metric-card"><div class="metric-value">₹${(data.total_revenue || 0).toFixed(0)}</div><div>Revenue</div></div>
+          <div class="metric-card"><div class="metric-value">${data.paid_orders || 0}</div><div>Paid Orders</div></div>
+          <div class="metric-card"><div class="metric-value">${data.orders_by_status?.pending || 0}</div><div>Pending</div></div>
         `;
-
         document.getElementById('analyticsGrid').innerHTML = html;
       } catch (error) {
-        document.getElementById('analyticsGrid').innerHTML = `<p style="color: red; padding: 20px;">Error loading analytics: ${error.message}</p>`;
+        document.getElementById('analyticsGrid').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
       }
     }
 
@@ -803,12 +430,6 @@
       alert.className = `alert show alert-${type}`;
       setTimeout(() => alert.classList.remove('show'), 5000);
     }
-
-    window.addEventListener('load', () => {
-      console.log('✅ Employee Portal Ready');
-      console.log('📡 API:', API_URL);
-      console.log('💳 Razorpay Key:', RAZORPAY_KEY);
-    });
   </script>
 </body>
 </html>
