@@ -299,7 +299,11 @@
 
     async function openRazorpayPayment(order) {
       try {
+        console.log('🎯 Opening Razorpay payment for order:', order.eps_reference_code);
+        
         // Step 1: Create Razorpay order on backend
+        console.log('📤 Sending request to:', `${API_URL}/api/razorpay/create-order`);
+        
         const razorpayRes = await axios.post(`${API_URL}/api/razorpay/create-order`, {
           amount: order.order_amount,
           receipt: order.eps_reference_code,
@@ -307,10 +311,15 @@
           customer_name: order.customer_name
         });
 
+        console.log('📥 Razorpay Response:', razorpayRes.data);
+
         if (!razorpayRes.data.success) {
-          showAlert(`❌ Error: ${razorpayRes.data.error}`, 'error');
+          console.error('❌ Razorpay failed:', razorpayRes.data.error);
+          showAlert(`❌ Razorpay Error: ${razorpayRes.data.error}`, 'error');
           return;
         }
+
+        console.log('✅ Razorpay order created:', razorpayRes.data.razorpay_order_id);
 
         // Step 2: Open Razorpay modal
         const options = {
@@ -329,20 +338,24 @@
             color: '#8E2A8C'
           },
           handler: function(response) {
+            console.log('💳 Payment successful:', response.razorpay_payment_id);
             verifyPayment(order.id, response, razorpayRes.data.razorpay_order_id);
           },
           modal: {
             ondismiss: function() {
+              console.log('❌ Payment cancelled by user');
               showAlert('⚠️ Payment cancelled', 'error');
             }
           }
         };
 
+        console.log('🎯 Opening Razorpay modal...');
         const rzp = new Razorpay(options);
         rzp.open();
       } catch (error) {
-        console.error('Error:', error);
-        showAlert(`❌ Payment Error: ${error.message}`, 'error');
+        console.error('❌ Full error:', error);
+        console.error('Error response:', error.response?.data);
+        showAlert(`❌ Payment Error: ${error.response?.data?.error || error.message}`, 'error');
       }
     }
 
