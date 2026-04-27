@@ -701,52 +701,66 @@
     }
 
     // ============ RAZORPAY PAYMENT ============
-    function initiateRazorpayPayment(order) {
-      const amount = order.order_amount * 100; // Convert to paise
+    async function initiateRazorpayPayment(order) {
+      try {
+        // Create Razorpay order on backend
+        const razorpayOrderResponse = await axios.post(`${API_URL}/api/razorpay/create-order`, {
+          amount: order.order_amount,
+          currency: 'INR',
+          receipt: order.eps_reference_code
+        });
 
-      const options = {
-        key: RAZORPAY_KEY,
-        amount: amount,
-        currency: 'INR',
-        name: 'EPS Worldwide',
-        description: `Order ${order.eps_reference_code}`,
-        order_id: order.id,
-        prefill: {
-          name: order.customer_name,
-          email: order.customer_email,
-          contact: order.customer_phone
-        },
-        theme: {
-          color: '#8E2A8C'
-        },
-        handler: function(response) {
-          // Payment successful
-          showAlert(`✅ Payment successful! Reference: ${order.eps_reference_code}`, 'success');
-          clearForm();
-          
-          // Update order status to paid (optional)
-          updateOrderPaymentStatus(order.id);
-        },
-        modal: {
-          ondismiss: function() {
-            showAlert('⚠️ Payment cancelled. Order created but payment pending.', 'info');
+        const razorpayOrder = razorpayOrderResponse.data;
+
+        const options = {
+          key: RAZORPAY_KEY,
+          amount: razorpayOrder.amount,
+          currency: razorpayOrder.currency,
+          name: 'EPS Worldwide',
+          description: `Order ${order.eps_reference_code}`,
+          order_id: razorpayOrder.id,
+          prefill: {
+            name: order.customer_name,
+            email: order.customer_email,
+            contact: order.customer_phone
+          },
+          theme: {
+            color: '#8E2A8C'
+          },
+          handler: function(response) {
+            // Payment successful
+            verifyPayment(order, response, razorpayOrder.id);
+          },
+          modal: {
+            ondismiss: function() {
+              showAlert('⚠️ Payment cancelled. Order created but payment pending.', 'info');
+            }
           }
-        }
-      };
+        };
 
-      const rzp = new Razorpay(options);
-      rzp.open();
+        const rzp = new Razorpay(options);
+        rzp.open();
+      } catch (error) {
+        console.error('Error creating Razorpay order:', error);
+        showAlert(`❌ Payment error: ${error.message}`, 'error');
+      }
     }
 
-    // ============ UPDATE ORDER PAYMENT STATUS ============
-    async function updateOrderPaymentStatus(orderId) {
+    // ============ VERIFY RAZORPAY PAYMENT ============
+    async function verifyPayment(order, response, razorpayOrderId) {
       try {
-        await axios.patch(`${API_URL}/api/orders/${orderId}/status`, {
-          new_status: 'confirmed',
-          reason: 'Payment received'
+        const verifyResponse = await axios.post(`${API_URL}/api/razorpay/verify`, {
+          razorpay_order_id: razorpayOrderId,
+          razorpay_payment_id: response.razorpay_payment_id,
+          order_id: order.id
         });
+
+        showAlert(`✅ Payment successful! Reference: ${order.eps_reference_code}`, 'success');
+        clearForm();
       } catch (error) {
-        console.error('Error updating order:', error);
+        console.error('Error verifying payment:', error);
+        showAlert(`⚠️ Payment completed but verification pending. Reference: ${order.eps_reference_code}`, 'info');
+        clearForm();
       }
     }
 
