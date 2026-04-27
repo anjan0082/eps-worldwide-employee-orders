@@ -143,8 +143,9 @@
     /* RADIO BUTTONS */
     .radio-group {
       display: flex;
-      gap: 20px;
+      gap: 15px;
       margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
     .radio-option {
@@ -374,6 +375,10 @@
       th {
         padding: 10px;
       }
+
+      .radio-group {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -521,7 +526,11 @@
           <div class="radio-group">
             <div class="radio-option">
               <input type="radio" name="paymentMethod" value="razorpay" id="razorpay" checked>
-              <label for="razorpay" style="margin-bottom: 0;">💳 Razorpay (Online)</label>
+              <label for="razorpay" style="margin-bottom: 0;">💳 Razorpay</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="paymentMethod" value="cash" id="cash">
+              <label for="cash" style="margin-bottom: 0;">💰 Cash</label>
             </div>
             <div class="radio-option">
               <input type="radio" name="paymentMethod" value="payment_later" id="payment_later">
@@ -660,7 +669,7 @@
         order_amount: parseFloat(document.getElementById('orderAmount').value),
         order_status: 'pending',
         payment_method: paymentMethod,
-        payment_status: paymentMethod === 'razorpay' ? 'pending' : 'pending',
+        payment_status: 'pending',
         notes: document.getElementById('notes').value,
         cheque_number: paymentMethod === 'cheque' ? document.getElementById('chequeNumber').value : null
       };
@@ -674,9 +683,14 @@
         if (paymentMethod === 'razorpay') {
           // Open Razorpay
           initiateRazorpayPayment(createdOrder);
+        } else if (paymentMethod === 'cash') {
+          // Cash - just confirm
+          showAlert(`✅ Order created! Cash confirmed. Reference: ${createdOrder.eps_reference_code}`, 'success');
+          clearForm();
         } else if (paymentMethod === 'payment_later') {
           // Send email for payment later
-          sendPaymentLaterEmail(createdOrder);
+          showAlert(`📧 Payment link sent to ${createdOrder.customer_email}. Reference: ${createdOrder.eps_reference_code}`, 'success');
+          clearForm();
         } else if (paymentMethod === 'cheque') {
           // Cheque payment - just confirm
           showAlert(`✅ Order created! Cheque #${document.getElementById('chequeNumber').value} recorded. Reference: ${createdOrder.eps_reference_code}`, 'success');
@@ -741,13 +755,6 @@
       }
     }
 
-    // ============ PAYMENT LATER EMAIL ============
-    function sendPaymentLaterEmail(order) {
-      // In production, this would call backend to send email
-      showAlert(`📧 Payment later email sent to ${order.customer_email}. Reference: ${order.eps_reference_code}`, 'success');
-      clearForm();
-    }
-
     // ============ CLEAR FORM ============
     function clearForm() {
       document.querySelectorAll('input, select, textarea').forEach(el => {
@@ -788,13 +795,19 @@
         `;
 
         orders.forEach(order => {
+          let paymentDisplay = '';
+          if (order.payment_method === 'razorpay') paymentDisplay = '💳 Razorpay';
+          else if (order.payment_method === 'cash') paymentDisplay = '💰 Cash';
+          else if (order.payment_method === 'cheque') paymentDisplay = '✓ Cheque';
+          else if (order.payment_method === 'payment_later') paymentDisplay = '📧 Payment Later';
+
           html += `
             <tr>
               <td><strong>${order.eps_reference_code}</strong></td>
               <td>${order.customer_name}</td>
               <td>${order.service_type}</td>
               <td>₹${order.order_amount}</td>
-              <td>${order.payment_method === 'razorpay' ? '💳 Razorpay' : order.payment_method === 'cheque' ? '✓ Cheque' : '📧 Payment Later'}</td>
+              <td>${paymentDisplay}</td>
               <td><span class="badge badge-${order.order_status}">${order.order_status}</span></td>
               <td>${new Date(order.created_at).toLocaleDateString()}</td>
             </tr>
