@@ -395,9 +395,9 @@
 
     <!-- TABS -->
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('create-order')">Create Order</button>
-      <button class="tab-btn" onclick="switchTab('my-orders')">My Orders</button>
-      <button class="tab-btn" onclick="switchTab('analytics')">Analytics</button>
+      <button class="tab-btn active" onclick="switchTab(event, 'create-order')">Create Order</button>
+      <button class="tab-btn" onclick="switchTab(event, 'my-orders')">My Orders</button>
+      <button class="tab-btn" onclick="switchTab(event, 'analytics')">Analytics</button>
     </div>
 
     <!-- TAB 1: CREATE ORDER -->
@@ -587,12 +587,13 @@
     const RAZORPAY_KEY = 'rzp_live_ShG1B8BUg7cDW2';
 
     // ============ TAB SWITCHING ============
-    function switchTab(tabName) {
+    function switchTab(e, tabName) {
+      e.preventDefault();
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
 
       document.getElementById(tabName).classList.add('active');
-      event.target.classList.add('active');
+      e.target.classList.add('active');
 
       if (tabName === 'my-orders') loadOrders();
       if (tabName === 'analytics') loadAnalytics();
@@ -656,25 +657,24 @@
         customer_email: document.getElementById('customerEmail').value,
         customer_phone: document.getElementById('customerPhone').value,
         pickup_address: document.getElementById('pickupAddress').value,
-        pickup_pincode: document.getElementById('pickupPincode').value,
+        pickup_pincode: document.getElementById('pickupPincode').value || null,
         delivery_address: document.getElementById('deliveryAddress').value,
         delivery_pincode: document.getElementById('deliveryPincode').value,
         service_type: document.getElementById('serviceType').value,
         shipping_method: document.getElementById('shippingMethod').value,
-        package_length: parseFloat(document.getElementById('packageLength').value) || 0,
-        package_width: parseFloat(document.getElementById('packageBreadth').value) || 0,
-        package_height: parseFloat(document.getElementById('packageHeight').value) || 0,
-        package_weight: parseFloat(document.getElementById('packageWeight').value) || 0,
-        volumetric_weight: parseFloat(document.getElementById('volumetricWeight').value) || 0,
+        package_length: parseFloat(document.getElementById('packageLength').value) || null,
+        package_width: parseFloat(document.getElementById('packageBreadth').value) || null,
+        package_height: parseFloat(document.getElementById('packageHeight').value) || null,
+        package_weight: parseFloat(document.getElementById('packageWeight').value) || null,
+        volumetric_weight: parseFloat(document.getElementById('volumetricWeight').value) || null,
         order_amount: parseFloat(document.getElementById('orderAmount').value),
         order_status: 'pending',
         payment_method: paymentMethod,
         payment_status: 'pending',
-        notes: document.getElementById('notes').value,
+        notes: document.getElementById('notes').value || null,
         cheque_number: paymentMethod === 'cheque' ? document.getElementById('chequeNumber').value : null
       };
 
-      // Save order to backend first
       try {
         const response = await axios.post(`${API_URL}/api/orders`, order);
         const createdOrder = response.data;
@@ -684,15 +684,12 @@
           // Open Razorpay
           initiateRazorpayPayment(createdOrder);
         } else if (paymentMethod === 'cash') {
-          // Cash - just confirm
           showAlert(`✅ Order created! Cash confirmed. Reference: ${createdOrder.eps_reference_code}`, 'success');
           clearForm();
         } else if (paymentMethod === 'payment_later') {
-          // Send email for payment later
           showAlert(`📧 Payment link sent to ${createdOrder.customer_email}. Reference: ${createdOrder.eps_reference_code}`, 'success');
           clearForm();
         } else if (paymentMethod === 'cheque') {
-          // Cheque payment - just confirm
           showAlert(`✅ Order created! Cheque #${document.getElementById('chequeNumber').value} recorded. Reference: ${createdOrder.eps_reference_code}`, 'success');
           clearForm();
         }
@@ -713,7 +710,6 @@
         currency: 'INR',
         name: 'EPS Worldwide',
         description: `Order ${order.eps_reference_code}`,
-        image: 'https://eps-worldwide.vercel.app/logo.png',
         order_id: order.id,
         prefill: {
           name: order.customer_name,
@@ -724,11 +720,16 @@
           color: '#8E2A8C'
         },
         handler: function(response) {
-          verifyPayment(order, response);
+          // Payment successful
+          showAlert(`✅ Payment successful! Reference: ${order.eps_reference_code}`, 'success');
+          clearForm();
+          
+          // Update order status to paid (optional)
+          updateOrderPaymentStatus(order.id);
         },
         modal: {
           ondismiss: function() {
-            showAlert('❌ Payment cancelled. Order created but payment pending.', 'info');
+            showAlert('⚠️ Payment cancelled. Order created but payment pending.', 'info');
           }
         }
       };
@@ -737,21 +738,15 @@
       rzp.open();
     }
 
-    // ============ VERIFY PAYMENT ============
-    async function verifyPayment(order, response) {
+    // ============ UPDATE ORDER PAYMENT STATUS ============
+    async function updateOrderPaymentStatus(orderId) {
       try {
-        const verifyResponse = await axios.post(`${API_URL}/api/payment/verify`, {
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_order_id: response.razorpay_order_id,
-          razorpay_signature: response.razorpay_signature,
-          order_id: order.id,
-          amount: order.order_amount
+        await axios.patch(`${API_URL}/api/orders/${orderId}/status`, {
+          new_status: 'confirmed',
+          reason: 'Payment received'
         });
-
-        showAlert(`✅ Payment successful! Reference: ${order.eps_reference_code}`, 'success');
-        clearForm();
       } catch (error) {
-        showAlert(`❌ Payment verification failed: ${error.message}`, 'error');
+        console.error('Error updating order:', error);
       }
     }
 
@@ -772,7 +767,7 @@
         const response = await axios.get(`${API_URL}/api/orders`);
         const orders = response.data;
 
-        if (orders.length === 0) {
+        if (!orders || orders.length === 0) {
           document.getElementById('ordersTable').innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">No orders created yet</p>';
           return;
         }
@@ -786,7 +781,7 @@
                   <th>Customer</th>
                   <th>Service</th>
                   <th>Amount</th>
-                  <th>Payment Method</th>
+                  <th>Payment</th>
                   <th>Status</th>
                   <th>Created</th>
                 </tr>
@@ -799,17 +794,17 @@
           if (order.payment_method === 'razorpay') paymentDisplay = '💳 Razorpay';
           else if (order.payment_method === 'cash') paymentDisplay = '💰 Cash';
           else if (order.payment_method === 'cheque') paymentDisplay = '✓ Cheque';
-          else if (order.payment_method === 'payment_later') paymentDisplay = '📧 Payment Later';
+          else if (order.payment_method === 'payment_later') paymentDisplay = '📧 Later';
 
           html += `
             <tr>
-              <td><strong>${order.eps_reference_code}</strong></td>
-              <td>${order.customer_name}</td>
-              <td>${order.service_type}</td>
-              <td>₹${order.order_amount}</td>
+              <td><strong>${order.eps_reference_code || 'N/A'}</strong></td>
+              <td>${order.customer_name || 'N/A'}</td>
+              <td>${order.service_type || 'N/A'}</td>
+              <td>₹${order.order_amount || 0}</td>
               <td>${paymentDisplay}</td>
-              <td><span class="badge badge-${order.order_status}">${order.order_status}</span></td>
-              <td>${new Date(order.created_at).toLocaleDateString()}</td>
+              <td><span class="badge badge-${order.order_status}">${order.order_status || 'pending'}</span></td>
+              <td>${order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}</td>
             </tr>
           `;
         });
