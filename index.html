@@ -250,83 +250,121 @@
       if (!validateForm()) return;
 
       const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+      const eps_reference_code = `EPS${Math.random().toString().slice(2, 7)}`;
       
-      const order = {
-        eps_reference_code: `EPS${Math.random().toString().slice(2, 7)}`,
-        employee_id: document.getElementById('employeeId').value,
-        customer_name: document.getElementById('customerName').value,
-        customer_email: document.getElementById('customerEmail').value,
-        customer_phone: document.getElementById('customerPhone').value,
-        pickup_address: document.getElementById('pickupAddress').value,
-        pickup_pincode: document.getElementById('pickupPincode').value || null,
-        delivery_address: document.getElementById('deliveryAddress').value,
-        delivery_pincode: document.getElementById('deliveryPincode').value,
-        service_type: document.getElementById('serviceType').value,
-        shipping_method: document.getElementById('shippingMethod').value,
-        package_length: parseFloat(document.getElementById('packageLength').value) || null,
-        package_width: parseFloat(document.getElementById('packageBreadth').value) || null,
-        package_height: parseFloat(document.getElementById('packageHeight').value) || null,
-        package_weight: parseFloat(document.getElementById('packageWeight').value) || null,
-        volumetric_weight: parseFloat(document.getElementById('volumetricWeight').value) || null,
-        order_amount: parseFloat(document.getElementById('orderAmount').value),
-        order_status: 'pending',
-        payment_method: paymentMethod,
-        payment_status: 'pending',
-        notes: document.getElementById('notes').value || null,
-        cheque_number: paymentMethod === 'cheque' ? document.getElementById('chequeNumber').value : null
-      };
+      // For Razorpay, create order on Razorpay first
+      if (paymentMethod === 'razorpay') {
+        try {
+          console.log('💳 Creating Razorpay order first...');
+          
+          const razorpayRes = await axios.post(`${API_URL}/api/razorpay/create-order`, {
+            amount: parseFloat(document.getElementById('orderAmount').value),
+            receipt: eps_reference_code,
+            customer_email: document.getElementById('customerEmail').value,
+            customer_name: document.getElementById('customerName').value
+          });
 
-      try {
-        const response = await axios.post(`${API_URL}/api/orders`, order);
-        currentOrder = response.data;
+          if (!razorpayRes.data.success) {
+            showAlert(`❌ Razorpay Error: ${razorpayRes.data.error}`, 'error');
+            return;
+          }
 
-        if (paymentMethod === 'razorpay') {
-          openRazorpayPayment(currentOrder);
-        } else if (paymentMethod === 'cash') {
-          showAlert(`✅ Order created! Reference: ${currentOrder.eps_reference_code}`, 'success');
-          clearForm();
-        } else if (paymentMethod === 'payment_later') {
-          showAlert(`📧 Order created! Payment link sent. Reference: ${currentOrder.eps_reference_code}`, 'success');
-          clearForm();
-        } else if (paymentMethod === 'cheque') {
-          showAlert(`✅ Order created! Cheque recorded. Reference: ${currentOrder.eps_reference_code}`, 'success');
-          clearForm();
+          console.log('✅ Razorpay order created:', razorpayRes.data.razorpay_order_id);
+
+          // Now create our order
+          const order = {
+            eps_reference_code: eps_reference_code,
+            employee_id: document.getElementById('employeeId').value,
+            customer_name: document.getElementById('customerName').value,
+            customer_email: document.getElementById('customerEmail').value,
+            customer_phone: document.getElementById('customerPhone').value,
+            pickup_address: document.getElementById('pickupAddress').value,
+            pickup_pincode: document.getElementById('pickupPincode').value || null,
+            delivery_address: document.getElementById('deliveryAddress').value,
+            delivery_pincode: document.getElementById('deliveryPincode').value,
+            service_type: document.getElementById('serviceType').value,
+            shipping_method: document.getElementById('shippingMethod').value,
+            package_length: parseFloat(document.getElementById('packageLength').value) || null,
+            package_width: parseFloat(document.getElementById('packageBreadth').value) || null,
+            package_height: parseFloat(document.getElementById('packageHeight').value) || null,
+            package_weight: parseFloat(document.getElementById('packageWeight').value) || null,
+            volumetric_weight: parseFloat(document.getElementById('volumetricWeight').value) || null,
+            order_amount: parseFloat(document.getElementById('orderAmount').value),
+            order_status: 'pending',
+            payment_method: paymentMethod,
+            payment_status: 'pending',
+            notes: document.getElementById('notes').value || null,
+            cheque_number: null,
+            awb_number: razorpayRes.data.razorpay_order_id
+          };
+
+          const response = await axios.post(`${API_URL}/api/orders`, order);
+          currentOrder = response.data;
+
+          openRazorpayPayment(currentOrder, razorpayRes.data);
+
+        } catch (error) {
+          console.error('Error in Razorpay flow:', error);
+          showAlert(`❌ Error: ${error.response?.data?.error || error.message}`, 'error');
         }
-      } catch (error) {
-        showAlert(`❌ Error: ${error.response?.data?.error || error.message}`, 'error');
+      } else {
+        // For non-Razorpay payments
+        const order = {
+          eps_reference_code: eps_reference_code,
+          employee_id: document.getElementById('employeeId').value,
+          customer_name: document.getElementById('customerName').value,
+          customer_email: document.getElementById('customerEmail').value,
+          customer_phone: document.getElementById('customerPhone').value,
+          pickup_address: document.getElementById('pickupAddress').value,
+          pickup_pincode: document.getElementById('pickupPincode').value || null,
+          delivery_address: document.getElementById('deliveryAddress').value,
+          delivery_pincode: document.getElementById('deliveryPincode').value,
+          service_type: document.getElementById('serviceType').value,
+          shipping_method: document.getElementById('shippingMethod').value,
+          package_length: parseFloat(document.getElementById('packageLength').value) || null,
+          package_width: parseFloat(document.getElementById('packageBreadth').value) || null,
+          package_height: parseFloat(document.getElementById('packageHeight').value) || null,
+          package_weight: parseFloat(document.getElementById('packageWeight').value) || null,
+          volumetric_weight: parseFloat(document.getElementById('volumetricWeight').value) || null,
+          order_amount: parseFloat(document.getElementById('orderAmount').value),
+          order_status: 'pending',
+          payment_method: paymentMethod,
+          payment_status: 'pending',
+          notes: document.getElementById('notes').value || null,
+          cheque_number: paymentMethod === 'cheque' ? document.getElementById('chequeNumber').value : null
+        };
+
+        try {
+          const response = await axios.post(`${API_URL}/api/orders`, order);
+          currentOrder = response.data;
+
+          if (paymentMethod === 'cash') {
+            showAlert(`✅ Order created! Reference: ${currentOrder.eps_reference_code}`, 'success');
+            clearForm();
+          } else if (paymentMethod === 'payment_later') {
+            showAlert(`📧 Order created! Payment link sent. Reference: ${currentOrder.eps_reference_code}`, 'success');
+            clearForm();
+          } else if (paymentMethod === 'cheque') {
+            showAlert(`✅ Order created! Cheque recorded. Reference: ${currentOrder.eps_reference_code}`, 'success');
+            clearForm();
+          }
+        } catch (error) {
+          showAlert(`❌ Error: ${error.response?.data?.error || error.message}`, 'error');
+        }
       }
     }
 
-    async function openRazorpayPayment(order) {
+    async function openRazorpayPayment(order, razorpayData) {
       try {
-        console.log('🎯 Opening Razorpay payment for order:', order.eps_reference_code);
-        
-        // Step 1: Create Razorpay order on backend
-        console.log('📤 Sending request to:', `${API_URL}/api/razorpay/create-order`);
-        
-        const razorpayRes = await axios.post(`${API_URL}/api/razorpay/create-order`, {
-          amount: order.order_amount,
-          receipt: order.eps_reference_code,
-          customer_email: order.customer_email,
-          customer_name: order.customer_name
-        });
+        console.log('🎯 Opening Razorpay payment');
+        console.log('Razorpay Order ID:', razorpayData.razorpay_order_id);
 
-        console.log('📥 Razorpay Response:', razorpayRes.data);
-
-        if (!razorpayRes.data.success) {
-          console.error('❌ Razorpay failed:', razorpayRes.data.error);
-          showAlert(`❌ Razorpay Error: ${razorpayRes.data.error}`, 'error');
-          return;
-        }
-
-        console.log('✅ Razorpay order created:', razorpayRes.data.razorpay_order_id);
-
-        // Step 2: Open Razorpay modal
+        // Use the Razorpay order data we already created
         const options = {
           key: RAZORPAY_KEY,
-          order_id: razorpayRes.data.razorpay_order_id,
-          amount: razorpayRes.data.amount,
-          currency: razorpayRes.data.currency,
+          order_id: razorpayData.razorpay_order_id,
+          amount: razorpayData.amount,
+          currency: razorpayData.currency,
           name: 'EPS Worldwide',
           description: `Order ${order.eps_reference_code}`,
           prefill: {
@@ -339,7 +377,7 @@
           },
           handler: function(response) {
             console.log('💳 Payment successful:', response.razorpay_payment_id);
-            verifyPayment(order.id, response, razorpayRes.data.razorpay_order_id);
+            verifyPayment(order.id, response, razorpayData.razorpay_order_id);
           },
           modal: {
             ondismiss: function() {
