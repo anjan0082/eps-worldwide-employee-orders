@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DHL International Rate Calculator — EPS Worldwide</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #D40511;
+    --yellow: #FFCC00;
+    --dark: #1a1a1a;
+    --mid: #2c2c2c;
+    --surface: #242424;
+    --border: #3a3a3a;
+    --text: #f0f0f0;
+    --muted: #888;
+    --green: #00c853;
+    --card-bg: #1e1e1e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--red);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    right: -80px; top: -40px;
+    width: 280px; height: 280px;
+    background: var(--yellow);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    opacity: 0.15;
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .dhl-logo {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .dhl-logo span {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--yellow);
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+  .header-divider {
+    width: 2px;
+    height: 48px;
+    background: rgba(255,255,255,0.3);
+  }
+  .header-text h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+    line-height: 1.1;
+  }
+  .header-text p {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .eps-badge {
+    margin-left: auto;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 1px;
+  }
+
+  /* TICKER STRIP */
+  .ticker {
+    background: var(--yellow);
+    padding: 6px 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .ticker-inner {
+    display: inline-block;
+    animation: ticker 35s linear infinite;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dark);
+    letter-spacing: 1px;
+  }
+  @keyframes ticker {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+  }
+
+  /* MAIN */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px 0;
+  }
+
+  /* SHIPMENT TYPE TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    background: var(--surface);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .tab {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .tab:hover { color: var(--text); background: var(--border); }
+  .tab.active {
+    background: var(--red);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(212,5,17,0.4);
+  }
+
+  /* TWO COL LAYOUT */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::before {
+    content: '';
+    width: 3px;
+    height: 14px;
+    background: var(--red);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* FORM ELEMENTS */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .form-row.single { grid-template-columns: 1fr; }
+  .form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+  .field input, .field select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(212,5,17,0.12);
+  }
+  .field select option { background: var(--dark); }
+  .field .hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* PACKAGE ROWS */
+  .pkg-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 10px;
+  }
+  .pkg-row .field { margin: 0; }
+  .remove-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .remove-btn:hover { border-color: var(--red); color: var(--red); }
+
+  .add-pkg-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--muted);
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    width: 100%;
+    transition: all 0.2s;
+    margin-top: 6px;
+  }
+  .add-pkg-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+
+  .pkg-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 36px;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .pkg-header span {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 0 2px;
+  }
+
+  /* CALCULATE BTN */
+  .calc-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--red);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(212,5,17,0.3);
+  }
+  .calc-btn:hover {
+    background: #b8040f;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(212,5,17,0.4);
+  }
+  .calc-btn:active { transform: translateY(0); }
+
+  /* RESULT PANEL */
+  .result-panel {
+    position: sticky;
+    top: 20px;
+  }
+
+  .result-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .result-header {
+    background: var(--red);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .result-header h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .result-badge {
+    background: var(--yellow);
+    color: var(--dark);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .result-body { padding: 20px; }
+
+  .result-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .result-empty .icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
+
+  /* WEIGHT DISPLAY */
+  .weight-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .weight-row:last-child { border-bottom: none; }
+  .weight-row .wlabel {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .weight-row .wval {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .weight-row .wval.highlight { color: var(--yellow); }
+  .weight-row .wval.chargeable { color: var(--red); font-size: 24px; }
+
+  /* PRICE CARD — total highlight */
+  .price-main {
+    background: linear-gradient(135deg, #1a3a1a 0%, #0d2b0d 100%);
+    border: 1px solid rgba(0,200,83,0.25);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+    text-align: center;
+  }
+  .price-main .plabel {
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+  }
+  .price-main .pvalue {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--yellow);
+    line-height: 1;
+  }
+  .price-main .psub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    margin-top: 4px;
+  }
+
+  .surcharge-rows { margin-top: 12px; }
+  .surcharge-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .surcharge-row:last-child { border-bottom: none; }
+  .surcharge-row .sname { color: var(--muted); }
+  .surcharge-row .sval { font-weight: 600; color: var(--text); }
+  .surcharge-row.total-row {
+    padding-top: 12px;
+    margin-top: 4px;
+    border-top: 2px solid var(--border);
+    border-bottom: none;
+  }
+  .surcharge-row.total-row .sname {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .surcharge-row.total-row .sval {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    color: var(--muted);
+  }
+
+  /* INFO NOTES */
+  .info-note {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--yellow);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-top: 14px;
+  }
+  .info-note strong { color: var(--yellow); }
+
+  /* DESTINATION DISPLAY */
+  .dest-display {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .dest-flag { font-size: 24px; }
+  .dest-info { flex: 1; }
+  .dest-country { font-weight: 600; font-size: 15px; }
+  .dest-zone {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .zone-pill {
+    background: var(--red);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  /* COUNTRY SEARCH */
+  .country-search-wrap { position: relative; }
+  .country-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    background: var(--mid);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    margin-top: 4px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .country-option {
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.15s;
+  }
+  .country-option:hover { background: var(--border); }
+  .country-option .czone {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    background: var(--surface);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .country-dropdown::-webkit-scrollbar { width: 4px; }
+  .country-dropdown::-webkit-scrollbar-track { background: transparent; }
+  .country-dropdown::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* MULTIPLIER SECTION */
+  .multiplier-info {
+    background: rgba(255,204,0,0.08);
+    border: 1px solid rgba(255,204,0,0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 12px;
+  }
+  .multiplier-info .mi-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--yellow);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .multiplier-info .mi-detail {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .multiplier-info .mi-detail strong { color: var(--text); }
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="dhl-logo"><span>DHL</span></div>
+    <div class="header-divider"></div>
+    <div class="header-text">
+      <h1>International Shipment Rate Calculator</h1>
+      <p>Express Worldwide Export — Rates WEF 15 Jan 2026</p>
+    </div>
+    <div class="eps-badge">EPS WORLDWIDE</div>
+  </div>
+</div>
+
+<div class="ticker">
+  <div class="ticker-inner">
+    ✈ DHL EXPRESS WORLDWIDE EXPORT &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp; FUEL SURCHARGE AS APPLICABLE &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp; GST AS APPLICABLE &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp; GO GREEN CHARGES: ₹30/KG + GST FOR ALL DESTINATIONS &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp; CUSTOM CLEARANCE: ₹2,800 + GST &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp; CSB-5: ₹3,000 + GST (IF INVOICE VALUE > ₹25,000) &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp; VOLUMETRIC DIVISOR: 5,000 cm³/kg &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- SHIPMENT TYPE TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="setType('doc_under2')" id="tab-doc_under2">📄 Document (≤2 kg)</button>
+    <button class="tab" onclick="setType('nondoc')" id="tab-nondoc">📦 Non-Document / Doc (≥2.5 kg)</button>
+    <button class="tab" onclick="setType('heavy')" id="tab-heavy">🏗 Heavy Parcel (30.1–500 kg)</button>
+  </div>
+
+  <div class="layout">
+    <!-- LEFT: INPUTS -->
+    <div class="left-col">
+
+      <!-- DESTINATION -->
+      <div class="card">
+        <div class="card-title">Destination</div>
+        <div class="form-row single">
+          <div class="field country-search-wrap">
+            <label>Country</label>
+            <input type="text" id="countryInput" placeholder="Search country..." autocomplete="off"
+              oninput="filterCountries()" onfocus="showDropdown()" onblur="hideDropdown()">
+            <div class="country-dropdown" id="countryDropdown" style="display:none;"></div>
+          </div>
+        </div>
+        <div id="destDisplay" style="display:none;" class="dest-display">
+          <div class="dest-flag" id="destFlag">🌍</div>
+          <div class="dest-info">
+            <div class="dest-country" id="destCountryName">—</div>
+            <div class="dest-zone" id="destZoneLabel">DHL Zone</div>
+          </div>
+          <div class="zone-pill" id="zonePill">Z1</div>
+        </div>
+      </div>
+
+      <!-- PACKAGES (for doc_under2 and nondoc) -->
+      <div class="card" id="pkgCard">
+        <div class="card-title">Package Details</div>
+
+        <!-- DOC UNDER 2 — weight only -->
+        <div id="docWeightSection">
+          <div class="form-row single">
+            <div class="field">
+              <label>Actual Weight (kg)</label>
+              <input type="number" id="docWeight" step="0.5" min="0.5" max="2" value="0.5" placeholder="0.5 – 2.0">
+              <div class="hint">Rounds up to nearest 0.5 kg. Max 2.0 kg for documents-only rate.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NON-DOC — multi-package with dimensions -->
+        <div id="nondocSection" style="display:none;">
+          <div class="pkg-header">
+            <span>Length (cm)</span>
+            <span>Width (cm)</span>
+            <span>Height (cm)</span>
+            <span>Act. Wt (kg)</span>
+            <span></span>
+          </div>
+          <div id="pkgRows"></div>
+          <button class="add-pkg-btn" onclick="addPackage()">+ Add Another Package</button>
+        </div>
+
+        <!-- HEAVY — from/to weight -->
+        <div id="heavySection" style="display:none;">
+          <div class="form-row single">
+            <div class="field">
+              <label>Total Chargeable Weight (kg)</label>
+              <input type="number" id="heavyWeight" step="0.1" min="30.1" max="500" value="50" placeholder="30.1 – 500">
+              <div class="hint">Multiplier rate applies per kg. Min 30.1 kg, max 500 kg.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SURCHARGES -->
+      <div class="card" id="surchargeCard">
+        <div class="card-title">Surcharges & Extras</div>
+        <div class="form-row">
+          <div class="field">
+            <label>Fuel Surcharge (%)</label>
+            <input type="number" id="fuelPct" value="0" step="0.1" min="0" placeholder="e.g. 25.5">
+          </div>
+          <div class="field">
+            <label>GST (%)</label>
+            <input type="number" id="gstPct" value="18" step="0.5" min="0" placeholder="e.g. 18">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Go Green Charge</label>
+            <select id="goGreen">
+              <option value="1">Include (₹30/kg + GST)</option>
+              <option value="0">Exclude</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Custom Clearance</label>
+            <select id="customClearance">
+              <option value="2800">Include (₹2,800 + GST)</option>
+              <option value="0">Exclude</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row single">
+          <div class="field">
+            <label>CSB-5 Clearance (if invoice > ₹25,000)</label>
+            <select id="csb5">
+              <option value="0">Exclude</option>
+              <option value="3000">Include (₹3,000 + GST)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- MARKUP & DISCOUNT -->
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+          <div class="form-row">
+            <div class="field">
+              <label>Markup (%) on Cost Price</label>
+              <input type="number" id="markupPct" value="50" step="0.5" min="0" placeholder="e.g. 50" oninput="calculate()">
+              <div class="hint">Default: 50% margin. Apply on calculated cost.</div>
+            </div>
+            <div class="field">
+              <label>Discount to Customer (%)</label>
+              <input type="number" id="discountPct" value="0" step="0.5" min="0" max="100" placeholder="e.g. 10" oninput="calculate()">
+              <div class="hint">Percentage discount on final price.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="calc-btn" onclick="calculate()">CALCULATE RATE ›</button>
+    </div>
+
+    <!-- RIGHT: RESULT -->
+    <div class="result-panel">
+      <div class="result-card">
+        <div class="result-header">
+          <h3>Rate Summary</h3>
+          <span class="result-badge" id="shipTypeLabel">DOCUMENT</span>
+        </div>
+        <div class="result-body" id="resultBody">
+          <div class="result-empty">
+            <div class="icon">✈</div>
+            <div>Select a destination and enter<br>shipment details to calculate.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-note" style="margin-top:14px;">
+        <strong>Note:</strong> Base rates are exclusive of fuel surcharge, GST, and other surcharges. 
+        Chargeable weight = higher of actual weight or volumetric weight (L×W×H ÷ 5000). 
+        All rates in ₹ INR. For heavy parcels, rate shown is per-kg multiplier × chargeable weight.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// =========================================================
+// DATA
+// =========================================================
+
+const ZONES = {
+  "Afghanistan":11,"Albania":11,"Algeria":11,"American Samoa":9,"Andorra":8,"Angola":11,
+  "Anguilla":10,"Antigua":10,"Argentina":10,"Armenia":11,"Aruba":10,"Australia":14,
+  "Austria":7,"Azerbaijan":11,"Bahamas":10,"Bahrain":4,"Bangladesh":1,"Barbados":10,
+  "Belarus":8,"Belgium":7,"Belize":10,"Benin":11,"Bermuda":10,"Bolivia":10,"Bonaire":10,
+  "Bosnia and Herzegovina":11,"Botswana":11,"Brazil":10,"Brunei":5,"Bulgaria":8,
+  "Burkina Faso":11,"Burundi":11,"Cambodia":5,"Cameroon":11,"Canada":9,"Canary Islands, The":8,
+  "Cape Verde":11,"Cayman Islands":10,"Central African Republic":11,"Chad":11,"Chile":10,
+  "China, People's Republic":3,"Colombia":10,"Comoros":11,"Congo":11,
+  "Congo, The Democratic Republic":11,"Cook Islands":11,"Costa Rica":10,"Cote d'Ivoire":11,
+  "Croatia":11,"Cuba":10,"Curacao":10,"Cyprus":8,"Czech Republic, The":7,"Denmark":7,
+  "Djibouti":11,"Dominica":10,"Dominican Republic":10,"East Timor":5,"Ecuador":10,
+  "Egypt":13,"El Salvador":10,"Eritrea":11,"Estonia":8,"Ethiopia":11,"Falkland Islands":8,
+  "Faroe Islands":8,"Fiji":11,"Finland":8,"France":7,"French Guyana":10,"Gabon":11,
+  "Gambia":11,"Georgia":11,"Germany":7,"Ghana":13,"Gibraltar":8,"Greece":8,"Greenland":8,
+  "Grenada":10,"Guadeloupe":10,"Guam":9,"Guatemala":10,"Guernsey":8,"Guinea Republic":11,
+  "Guinea-Bissau":11,"Guinea-Equatorial":11,"Guyana (British)":10,"Haiti":10,"Honduras":10,
+  "Hong Kong":2,"Hungary":7,"Iceland":8,"Indonesia":5,
+  "Iran (Islamic Republic of)":11,"Iraq":11,"Ireland, Republic Of":7,"Israel":8,"Italy":7,
+  "Jamaica":10,"Japan":5,"Jersey":8,"Jordan":4,"Kazakhstan":11,"Kenya":13,"Kiribati":11,
+  "Korea, Republic Of":5,"Korea, The D.P.R of":11,"Kosovo":11,"Kuwait":4,"Kyrgyzstan":11,
+  "Lao People's Democratic Republic":5,"Latvia":8,"Lebanon":11,"Lesotho":11,"Liberia":11,
+  "Libya":11,"Liechtenstein":7,"Lithuania":8,"Luxembourg":7,"Macau":5,
+  "Macedonia, Republic of":11,"Madagascar":11,"Malawi":11,"Malaysia":2,"Maldives":1,
+  "Mali":11,"Malta":8,"Marshall Islands":9,"Martinique":10,"Mauritania":11,"Mauritius":13,
+  "Mayotte":11,"Mexico":9,"Micronesia, Federated States of":11,"Moldova, Republic Of":11,
+  "Monaco":7,"Mongolia":11,"Montenegro, Republic of":11,"Montserrat":10,"Morocco":11,
+  "Mozambique":13,"Myanmar":5,"Namibia":11,"Nauru, Republic Of":11,"Nepal":1,
+  "Netherlands, The":7,"Nevis":10,"New Caledonia":11,"New Zealand":6,"Nicaragua":10,
+  "Niger":11,"Nigeria":13,"Niue":11,"Norway":8,"Oman":4,"Pakistan":4,"Palau":11,
+  "Panama":10,"Papua New Guinea":6,"Paraguay":10,"Peru":10,"Philippines, The":5,
+  "Poland":7,"Portugal":7,"Puerto Rico":9,"Qatar":4,"Reunion, Island Of":11,"Romania":7,
+  "Russian Federation, The":11,"Rwanda":11,"Saint Helena":11,"Saipan":9,"Samoa":11,
+  "San Marino":11,"Sao Tome and Principe":11,"Saudi Arabia":4,"Senegal":11,
+  "Serbia, Republic of":11,"Seychelles":11,"Sierra Leone":11,"Singapore":2,"Slovakia":7,
+  "Slovenia":8,"Solomon Islands":11,"Somalia":11,
+  "Somaliland, Rep of (North Somalia)":11,"South Africa":13,"South Sudan":11,"Spain":7,
+  "Sri Lanka":1,"St. Barthelemy":10,"St. Eustatius":10,"St. Kitts":10,"St. Lucia":10,
+  "St. Maarten":10,"St. Vincent":10,"Sudan":13,"Suriname":10,"Swaziland":11,"Sweden":7,
+  "Switzerland":7,"Syria":11,"Tahiti":11,"Taiwan":5,"Tajikistan":11,"Tanzania":13,
+  "Thailand":2,"Togo":11,"Tonga":11,"Trinidad and Tobago":10,"Tunisia":11,"Turkey":8,
+  "Turkmenistan":11,"Turks and Caicos Islands":10,"Tuvalu":11,"Uganda":13,"Ukraine":11,
+  "United Arab Emirates":1,"United Kingdom":7,"United States Of America":12,"Uruguay":10,
+  "Uzbekistan":11,"Vanuatu":11,"Vatican City State":7,"Venezuela":10,"Vietnam":5,
+  "Virgin Islands (British)":10,"Virgin Islands (US)":9,"Yemen, Republic of":11,
+  "Zambia":11,"Zimbabwe":13
+};
+
+// Zone index: zone 1 = index 0, zone 14 = index 13
+// Documents up to 2kg
+const DOC_RATES = {
+  0.5: [1128,1067,1313,1167,1632,1719,1394,2541,1501,2367,2850,1497,2323,1496],
+  1.0: [1407,1400,1545,1405,1997,2050,1610,3290,1726,3092,3706,1701,2791,1834],
+  1.5: [1616,1631,1847,1614,2326,2372,1826,4032,1835,3437,4194,1873,3299,2159],
+  2.0: [1821,1859,2146,1819,2654,2696,2044,4778,2051,3780,4680,2042,3807,2486]
+};
+
+// Non-doc / doc from 0.5kg (for doc >= 2.5kg use same table)
+const NONDOC_RATES = {
+  0.5: [1167,1160,1313,1239,1547,1719,1404,3182,1545,2376,3214,1525,2646,1579],
+  1.0: [1405,1386,1593,1387,1907,2050,1619,4059,1752,3091,3706,1711,3285,1629],
+  1.5: [1641,1639,1871,1533,2259,2372,1837,4926,1913,3435,4194,1884,3792,1929],
+  2.0: [1878,1887,2149,1678,2609,2696,2053,5795,2141,3780,4680,2054,4300,2217],
+  2.5: [2156,2142,2294,1822,2705,3022,2271,6667,2378,4127,5168,2296,4808,2518],
+  3.0: [2339,2342,2549,2055,2932,3282,2564,7579,2627,4484,5375,2533,5278,2753],
+  3.5: [2522,2542,2803,2289,3159,3542,2857,8490,2876,4842,5581,2769,5749,2989],
+  4.0: [2705,2742,3058,2522,3385,3802,3150,9402,3125,5199,5788,3006,6220,3224],
+  4.5: [2888,2943,3313,2755,3612,4062,3443,10314,3375,5557,5994,3242,6691,3459],
+  5.0: [3071,3143,3567,2989,3839,4322,3736,11225,3624,5914,6201,3479,7162,3695],
+  5.5: [3504,3597,4011,3240,4143,4577,3820,12054,3786,8125,8179,3631,7563,3899],
+  6.0: [3937,4042,4454,3485,4445,4840,3943,12883,3938,10328,10161,3772,7965,4102],
+  6.5: [4369,4488,4897,3730,4747,5102,4066,13712,4090,12531,12142,3913,8367,4306],
+  7.0: [4801,4933,5340,3975,5048,5364,4189,14541,4241,14734,14124,4054,8770,4509],
+  7.5: [5233,5378,5783,4220,5350,5626,4312,15371,4393,16937,16106,4195,9172,4712],
+  8.0: [5666,5823,6226,4465,5652,5888,4435,16200,4545,19140,18087,4337,9574,4916],
+  8.5: [6098,6268,6669,4710,5953,6150,4558,17029,4697,21343,20069,4478,9977,5119],
+  9.0: [6530,6713,7112,4955,6255,6413,4681,17858,4849,23546,22051,4619,10379,5322],
+  9.5: [6962,7158,7555,5200,6557,6675,4804,18688,5001,25750,24032,4760,10781,5525],
+  10.0:[7395,7603,7998,5445,6859,6937,4927,19517,5153,27953,26014,4902,11184,5729],
+  10.5:[7675,7822,8123,5699,7090,7282,5134,19706,5382,28082,26202,5142,11465,5945],
+  11.0:[7955,8040,8249,5952,7321,7628,5340,19896,5611,28212,26390,5383,11746,6161],
+  11.5:[8236,8258,8374,6206,7552,7974,5547,20085,5840,28341,26579,5624,12028,6377],
+  12.0:[8516,8477,8499,6460,7783,8319,5753,20274,6069,28471,26767,5865,12309,6593],
+  12.5:[8796,8695,8624,6713,8014,8665,5960,20464,6298,28600,26955,6105,12591,6809],
+  13.0:[9077,8913,8749,6967,8245,9010,6166,20653,6527,28730,27144,6346,12872,7026],
+  13.5:[9357,9131,8875,7220,8477,9356,6373,20843,6756,28859,27332,6587,13154,7242],
+  14.0:[9637,9350,9000,7474,8708,9702,6579,21032,6985,28988,27520,6828,13435,7458],
+  14.5:[9918,9568,9125,7728,8939,10047,6786,21221,7214,29118,27709,7068,13716,7674],
+  15.0:[10198,9786,9250,7981,9170,10393,6992,21411,7443,29247,27897,7309,13998,7890],
+  15.5:[10479,10005,9375,8235,9401,10739,7199,21600,7672,29377,28085,7550,14279,8106],
+  16.0:[10759,10223,9501,8488,9632,11084,7405,21789,7901,29506,28274,7791,14561,8322],
+  16.5:[11039,10441,9626,8742,9863,11430,7612,21979,8130,29636,28462,8031,14842,8539],
+  17.0:[11320,10659,9751,8995,10094,11775,7818,22168,8359,29765,28650,8272,15123,8755],
+  17.5:[11600,10878,9876,9249,10326,12121,8025,22358,8588,29895,28839,8513,15405,8971],
+  18.0:[11880,11096,10001,9503,10557,12467,8232,22547,8817,30024,29027,8754,15686,9187],
+  18.5:[12161,11314,10126,9756,10788,12812,8438,22736,9046,30154,29215,8994,15968,9403],
+  19.0:[12441,11532,10252,10010,11019,13158,8645,22926,9275,30283,29404,9235,16249,9619],
+  19.5:[12721,11751,10377,10263,11250,13503,8851,23115,9504,30413,29592,9476,16530,9835],
+  20.0:[13002,11969,10502,10517,11481,13849,9058,23305,9733,30542,29780,9717,16812,10052],
+  21.0:[13270,12390,11031,10749,11853,14115,9355,25631,10225,32896,32201,10201,17789,10520],
+  22.0:[13539,12810,11559,10981,12226,14382,9652,27957,10717,35250,34621,10686,18766,10989],
+  23.0:[13807,13231,12088,11214,12598,14648,9950,30283,11209,37604,37041,11171,19743,11458],
+  24.0:[14076,13651,12616,11446,12971,14915,10247,32609,11702,39958,39462,11656,20719,11926],
+  25.0:[14344,14072,13145,11678,13343,15181,10545,34936,12194,42312,41882,12140,21696,12395],
+  26.0:[14613,14492,13674,11910,13715,15448,10842,37262,12686,44666,44302,12625,22673,12864],
+  27.0:[14882,14913,14202,12142,14088,15714,11140,39588,13178,47020,46723,13110,23650,13332],
+  28.0:[15150,15333,14731,12375,14460,15980,11437,41914,13670,49374,49143,13594,24627,13801],
+  29.0:[15419,15754,15259,12607,14832,16247,11735,44240,14163,51728,51563,14079,25604,14270],
+  30.0:[15687,16174,15788,12839,15205,16513,12032,46566,14655,54082,53984,14564,26581,14738]
+};
+
+// Heavy multiplier (per kg rate)
+// Slabs: [30.1-50], [50.1-70], [70.1-100], [100.1-300], [300.1-500], [500.1+]
+const HEAVY_SLABS = [
+  { from: 30.1, to: 50,    rates: [460,460,518,417,639,536,409,1473,494,892,892,474,790,492] },
+  { from: 50.1, to: 70,    rates: [427,469,469,419,549,536,373,668,494,892,892,469,790,492] },
+  { from: 70.1, to: 100,   rates: [401,427,427,417,520,526,295,601,470,892,892,444,742,467] },
+  { from: 100.1, to: 300,  rates: [363,363,363,417,454,526,295,535,470,892,892,444,742,467] },
+  { from: 300.1, to: 500,  rates: [348,348,348,417,446,526,295,510,479,892,892,447,762,467] },
+  { from: 500.1, to: 99999,rates: [336,348,348,417,427,526,295,482,479,892,892,447,762,467] }
+];
+
+// =========================================================
+// STATE
+// =========================================================
+let shipType = 'doc_under2';
+let selectedCountry = null;
+let selectedZone = null;
+let pkgCount = 1;
+
+// =========================================================
+// COUNTRY SEARCH
+// =========================================================
+const countries = Object.keys(ZONES).sort();
+
+function filterCountries() {
+  const q = document.getElementById('countryInput').value.toLowerCase();
+  const dd = document.getElementById('countryDropdown');
+  if (!q) { dd.style.display = 'none'; return; }
+  const matches = countries.filter(c => c.toLowerCase().includes(q)).slice(0, 30);
+  if (!matches.length) { dd.style.display = 'none'; return; }
+  dd.innerHTML = matches.map(c =>
+    `<div class="country-option" onmousedown="selectCountry('${c.replace(/'/g,"\\'")}')">
+      <span>${c}</span><span class="czone">Zone ${ZONES[c]}</span>
+    </div>`
+  ).join('');
+  dd.style.display = 'block';
+}
+
+function showDropdown() { filterCountries(); }
+let hideTimer;
+function hideDropdown() { hideTimer = setTimeout(() => {
+  document.getElementById('countryDropdown').style.display = 'none';
+}, 200); }
+
+function selectCountry(c) {
+  clearTimeout(hideTimer);
+  selectedCountry = c;
+  selectedZone = ZONES[c];
+  document.getElementById('countryInput').value = c;
+  document.getElementById('countryDropdown').style.display = 'none';
+
+  const dd = document.getElementById('destDisplay');
+  dd.style.display = 'flex';
+  document.getElementById('destCountryName').textContent = c;
+  document.getElementById('destZoneLabel').textContent = `DHL Zone ${selectedZone}`;
+  document.getElementById('zonePill').textContent = `Z${selectedZone}`;
+}
+
+// =========================================================
+// TAB / TYPE
+// =========================================================
+function setType(t) {
+  shipType = t;
+  ['doc_under2','nondoc','heavy'].forEach(x => {
+    document.getElementById('tab-'+x).classList.toggle('active', x===t);
+  });
+  document.getElementById('docWeightSection').style.display = t==='doc_under2' ? '' : 'none';
+  document.getElementById('nondocSection').style.display = t==='nondoc' ? '' : 'none';
+  document.getElementById('heavySection').style.display = t==='heavy' ? '' : 'none';
+
+  const labels = { doc_under2:'DOCUMENT', nondoc:'NON-DOCUMENT', heavy:'HEAVY PARCEL' };
+  document.getElementById('shipTypeLabel').textContent = labels[t];
+
+  if (t==='nondoc' && document.getElementById('pkgRows').children.length===0) addPackage();
+  clearResult();
+}
+
+// =========================================================
+// PACKAGES
+// =========================================================
+function addPackage() {
+  pkgCount++;
+  const row = document.createElement('div');
+  row.className = 'pkg-row';
+  row.id = 'pkg-'+pkgCount;
+  row.innerHTML = `
+    <div class="field"><input type="number" step="1" min="1" placeholder="L" id="l${pkgCount}"></div>
+    <div class="field"><input type="number" step="1" min="1" placeholder="W" id="w${pkgCount}"></div>
+    <div class="field"><input type="number" step="1" min="1" placeholder="H" id="h${pkgCount}"></div>
+    <div class="field"><input type="number" step="0.1" min="0.1" placeholder="kg" id="aw${pkgCount}"></div>
+    <button class="remove-btn" onclick="removePackage(${pkgCount})">×</button>
+  `;
+  document.getElementById('pkgRows').appendChild(row);
+}
+
+function removePackage(id) {
+  const el = document.getElementById('pkg-'+id);
+  if (el) el.remove();
+}
+
+// init first package
+(function initFirstPkg() {
+  const row = document.createElement('div');
+  row.className = 'pkg-row';
+  row.id = 'pkg-1';
+  row.innerHTML = `
+    <div class="field"><input type="number" step="1" min="1" placeholder="L" id="l1"></div>
+    <div class="field"><input type="number" step="1" min="1" placeholder="W" id="w1"></div>
+    <div class="field"><input type="number" step="1" min="1" placeholder="H" id="h1"></div>
+    <div class="field"><input type="number" step="0.1" min="0.1" placeholder="kg" id="aw1"></div>
+    <div style="width:36px;"></div>
+  `;
+  document.getElementById('pkgRows').appendChild(row);
+})();
+
+// =========================================================
+// CALCULATE
+// =========================================================
+function roundUp05(val) {
+  return Math.ceil(val / 0.5) * 0.5;
+}
+
+function getNondocRate(kg, zoneIdx) {
+  const keys = Object.keys(NONDOC_RATES).map(Number).sort((a,b)=>a-b);
+  // Find exact or nearest available key
+  let rateKey = null;
+  // For weights between defined keys, find closest ceiling
+  for (let k of keys) {
+    if (kg <= k + 0.001) { rateKey = k; break; }
+  }
+  if (rateKey === null) rateKey = keys[keys.length-1];
+  return NONDOC_RATES[rateKey][zoneIdx];
+}
+
+function getHeavySlab(kg) {
+  for (let s of HEAVY_SLABS) {
+    if (kg >= s.from && kg <= s.to) return s;
+  }
+  return HEAVY_SLABS[HEAVY_SLABS.length-1];
+}
+
+function formatINR(n) {
+  return '₹' + Math.round(n).toLocaleString('en-IN');
+}
+
+function clearResult() {
+  document.getElementById('resultBody').innerHTML = `
+    <div class="result-empty">
+      <div class="icon">✈</div>
+      <div>Select a destination and enter<br>shipment details to calculate.</div>
+    </div>`;
+}
+
+function calculate() {
+  if (!selectedZone) {
+    alert('Please select a destination country first.');
+    return;
+  }
+  const zoneIdx = selectedZone - 1; // 0-based
+
+  let baseRate = 0, chargeableWt = 0, volWt = 0, actualWt = 0;
+  let pkgDetails = [];
+  let errorMsg = null;
+
+  if (shipType === 'doc_under2') {
+    actualWt = parseFloat(document.getElementById('docWeight').value) || 0;
+    if (actualWt <= 0 || actualWt > 2) { alert('Weight must be 0.5–2.0 kg for document rate.'); return; }
+    chargeableWt = roundUp05(actualWt);
+    if (chargeableWt > 2) chargeableWt = 2;
+    const rateKey = chargeableWt.toFixed(1);
+    const keyNum = parseFloat(rateKey);
+    if (!DOC_RATES[keyNum]) { alert('Rate not available for this weight.'); return; }
+    baseRate = DOC_RATES[keyNum][zoneIdx];
+  }
+  else if (shipType === 'nondoc') {
+    const rows = document.getElementById('pkgRows').children;
+    if (!rows.length) { alert('Add at least one package.'); return; }
+    let totalActual = 0, totalVol = 0;
+    for (let row of rows) {
+      const id = row.id.split('-')[1];
+      const l = parseFloat(document.getElementById('l'+id)?.value) || 0;
+      const w = parseFloat(document.getElementById('w'+id)?.value) || 0;
+      const h = parseFloat(document.getElementById('h'+id)?.value) || 0;
+      const aw = parseFloat(document.getElementById('aw'+id)?.value) || 0;
+      if (!aw) continue;
+      const vol = l && w && h ? (l * w * h) / 5000 : 0;
+      pkgDetails.push({ l, w, h, aw, vol, chargeable: Math.max(aw, vol) });
+      totalActual += aw;
+      totalVol += vol;
+    }
+    if (!pkgDetails.length) { alert('Enter at least one package with actual weight.'); return; }
+    actualWt = totalActual;
+    volWt = totalVol;
+    chargeableWt = roundUp05(Math.max(totalActual, totalVol));
+    if (chargeableWt > 30) {
+      // Use nondoc table max (30kg) — if over 30, use heavy table
+      errorMsg = '⚠ Weight exceeds 30 kg. Consider using the Heavy Parcel tab for more accurate pricing.';
+      chargeableWt = Math.min(chargeableWt, 30);
+    }
+    baseRate = getNondocRate(chargeableWt, zoneIdx);
+  }
+  else { // heavy
+    chargeableWt = parseFloat(document.getElementById('heavyWeight').value) || 0;
+    if (chargeableWt < 30.1) { alert('Heavy parcel minimum is 30.1 kg.'); return; }
+    const slab = getHeavySlab(chargeableWt);
+    const perKgRate = slab.rates[zoneIdx];
+    baseRate = perKgRate * chargeableWt;
+  }
+
+  // SURCHARGES
+  const fuelPct = parseFloat(document.getElementById('fuelPct').value) || 0;
+  const gstPct = parseFloat(document.getElementById('gstPct').value) || 0;
+  const goGreen = parseInt(document.getElementById('goGreen').value);
+  const customClear = parseInt(document.getElementById('customClearance').value);
+  const csb5 = parseInt(document.getElementById('csb5').value);
+
+  const fuel = baseRate * fuelPct / 100;
+  const subtotalAfterFuel = baseRate + fuel;
+  const goGreenCharge = goGreen ? (30 * chargeableWt) : 0;
+  const goGreenGST = goGreenCharge * gstPct / 100;
+  const customGST = customClear * gstPct / 100;
+  const csb5GST = csb5 * gstPct / 100;
+  const baseGST = (subtotalAfterFuel) * gstPct / 100;
+
+  const costPrice = subtotalAfterFuel + baseGST + goGreenCharge + goGreenGST + customClear + customGST + csb5 + csb5GST;
+
+  // MARKUP & DISCOUNT
+  const markupPct = parseFloat(document.getElementById('markupPct').value) || 0;
+  const discountPct = parseFloat(document.getElementById('discountPct').value) || 0;
+  
+  const markupAmount = costPrice * markupPct / 100;
+  const priceWithMarkup = costPrice + markupAmount;
+  const discountAmount = priceWithMarkup * discountPct / 100;
+  const total = priceWithMarkup - discountAmount;
+
+  // BUILD RESULT HTML
+  let html = '';
+
+  // Destination + weight summary
+  html += `<div style="margin-bottom:14px;">`;
+  // Destination
+  html += `<div class="weight-row">
+    <span class="wlabel">Destination</span>
+    <span class="wval" style="font-size:16px;">${selectedCountry}</span>
+  </div>`;
+  html += `<div class="weight-row">
+    <span class="wlabel">DHL Zone</span>
+    <span class="wval">Zone ${selectedZone}</span>
+  </div>`;
+
+  if (shipType !== 'doc_under2') {
+    html += `<div class="weight-row">
+      <span class="wlabel">Actual Weight</span>
+      <span class="wval">${actualWt.toFixed(2)} kg</span>
+    </div>`;
+    if (shipType === 'nondoc' && volWt > 0) {
+      html += `<div class="weight-row">
+        <span class="wlabel">Volumetric Weight</span>
+        <span class="wval highlight">${volWt.toFixed(3)} kg</span>
+      </div>`;
+    }
+  } else {
+    html += `<div class="weight-row">
+      <span class="wlabel">Actual Weight</span>
+      <span class="wval">${actualWt.toFixed(2)} kg</span>
+    </div>`;
+  }
+
+  html += `<div class="weight-row">
+    <span class="wlabel">Chargeable Weight</span>
+    <span class="wval chargeable">${chargeableWt.toFixed(1)} kg</span>
+  </div>`;
+  html += `</div>`;
+
+  // Total highlight box (shown AFTER surcharges are calculated — moved below)
+  const perKgLabel = shipType === 'heavy' ? ` (${formatINR(getHeavySlab(chargeableWt).rates[zoneIdx])}/kg × ${chargeableWt} kg)` : '';
+  html += `<div class="price-main">
+    <div class="plabel">Total Estimate (All Inclusive)</div>
+    <div class="pvalue">${formatINR(total)}</div>
+    <div class="psub">Zone ${selectedZone} · ${chargeableWt.toFixed(1)} kg chargeable · Base: ${formatINR(baseRate)}</div>
+  </div>`;
+
+  // Surcharges breakdown
+  html += `<div class="surcharge-rows">`;
+  html += `<div class="surcharge-row"><span class="sname">Base Rate</span><span class="sval">${formatINR(baseRate)}</span></div>`;
+  if (fuelPct > 0) html += `<div class="surcharge-row"><span class="sname">Fuel Surcharge (${fuelPct}%)</span><span class="sval">${formatINR(fuel)}</span></div>`;
+  if (gstPct > 0) html += `<div class="surcharge-row"><span class="sname">GST on Freight (${gstPct}%)</span><span class="sval">${formatINR(baseGST)}</span></div>`;
+  if (goGreen) {
+    html += `<div class="surcharge-row"><span class="sname">Go Green (₹30×${chargeableWt.toFixed(1)} kg)</span><span class="sval">${formatINR(goGreenCharge)}</span></div>`;
+    if (gstPct > 0) html += `<div class="surcharge-row"><span class="sname">GST on Go Green</span><span class="sval">${formatINR(goGreenGST)}</span></div>`;
+  }
+  if (customClear > 0) {
+    html += `<div class="surcharge-row"><span class="sname">Custom Clearance</span><span class="sval">${formatINR(customClear)}</span></div>`;
+    if (gstPct > 0) html += `<div class="surcharge-row"><span class="sname">GST on Clearance</span><span class="sval">${formatINR(customGST)}</span></div>`;
+  }
+  if (csb5 > 0) {
+    html += `<div class="surcharge-row"><span class="sname">CSB-5 Clearance</span><span class="sval">${formatINR(csb5)}</span></div>`;
+    if (gstPct > 0) html += `<div class="surcharge-row"><span class="sname">GST on CSB-5</span><span class="sval">${formatINR(csb5GST)}</span></div>`;
+  }
+  html += `<div class="surcharge-row total-row">
+    <span class="sname">COST PRICE (All Inclusive)</span>
+    <span class="sval">${formatINR(costPrice)}</span>
+  </div>`;
+  
+  // Markup section
+  if (markupPct > 0) {
+    html += `<div class="surcharge-row" style="background: rgba(255,204,0,0.1);">
+      <span class="sname" style="color: var(--yellow); font-weight: 600;">Markup (${markupPct}%)</span>
+      <span class="sval" style="color: var(--yellow); font-weight: 600;">+${formatINR(markupAmount)}</span>
+    </div>`;
+  }
+  
+  // Discount section
+  if (discountPct > 0) {
+    html += `<div class="surcharge-row" style="background: rgba(0,200,83,0.1);">
+      <span class="sname" style="color: var(--green); font-weight: 600;">Customer Discount (${discountPct}%)</span>
+      <span class="sval" style="color: var(--green); font-weight: 600;">-${formatINR(discountAmount)}</span>
+    </div>`;
+  }
+  
+  html += `<div class="surcharge-row total-row" style="background: var(--red); margin-top: 4px;">
+    <span class="sname" style="color: white; font-size: 15px;">FINAL PRICE FOR CUSTOMER</span>
+    <span class="sval" style="color: var(--yellow); font-size: 18px; font-weight: 700;">${formatINR(total)}</span>
+  </div>`;
+  html += `</div>`;
+
+  // Package breakdown for nondoc
+  if (shipType === 'nondoc' && pkgDetails.length > 1) {
+    html += `<div class="multiplier-info" style="margin-top:14px;">
+      <div class="mi-title">Package Breakdown</div>
+      <div class="mi-detail">`;
+    pkgDetails.forEach((p, i) => {
+      html += `<strong>Pkg ${i+1}:</strong> ${p.l||'?'}×${p.w||'?'}×${p.h||'?'} cm | Act: ${p.aw} kg | Vol: ${p.vol.toFixed(2)} kg | Chg: ${p.chargeable.toFixed(2)} kg<br>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // Heavy slab info
+  if (shipType === 'heavy') {
+    const slab = getHeavySlab(chargeableWt);
+    const rate = slab.rates[zoneIdx];
+    html += `<div class="multiplier-info" style="margin-top:14px;">
+      <div class="mi-title">Rate Slab Applied</div>
+      <div class="mi-detail">
+        Weight range: <strong>${slab.from}–${slab.to} kg</strong><br>
+        Rate per kg (Zone ${selectedZone}): <strong>₹${rate}</strong><br>
+        Calculation: ₹${rate} × ${chargeableWt} kg = <strong>${formatINR(baseRate)}</strong>
+      </div>
+    </div>`;
+  }
+
+  if (errorMsg) {
+    html += `<div class="info-note" style="border-color:var(--red); margin-top:12px;">${errorMsg}</div>`;
+  }
+
+  document.getElementById('resultBody').innerHTML = html;
+}
+</script>
+</body>
+</html>
