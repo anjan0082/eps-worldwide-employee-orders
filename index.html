@@ -335,6 +335,22 @@
                             </div>
                         </div>
 
+                        <h3 style="margin-bottom: 15px; font-size: 16px; color: var(--primary); margin-top: 20px;">Receiver Information</h3>
+                        <div class="grid">
+                            <div class="form-group">
+                                <label>Receiver Name</label>
+                                <input type="text" id="receiverName" placeholder="Receiver Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Receiver Phone</label>
+                                <input type="tel" id="receiverPhone" placeholder="Receiver Phone Number" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Receiver Pincode</label>
+                                <input type="text" id="receiverPincode" placeholder="Receiver Pincode" required>
+                            </div>
+                        </div>
+
                         <h3 style="margin-bottom: 15px; font-size: 16px; color: var(--primary); margin-top: 20px;">Pickup Address</h3>
                         <div class="grid full">
                             <div class="form-group">
@@ -356,23 +372,44 @@
                             <div class="form-group">
                                 <label>Service Type</label>
                                 <select id="serviceType" required>
-                                    <option>Domestic</option>
-                                    <option>International</option>
-                                    <option>Express</option>
+                                    <option value="">Select Service Type</option>
+                                    <option>Domestic Parcel</option>
+                                    <option>Domestic Document</option>
+                                    <option>International Parcel</option>
+                                    <option>International Document</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Shipping Method</label>
                                 <select id="shippingMethod" required>
-                                    <option>Standard</option>
+                                    <option value="">Select Shipping Method</option>
+                                    <option>Surface</option>
+                                    <option>Air</option>
+                                    <option>Train</option>
                                     <option>Express</option>
-                                    <option>Overnight</option>
+                                    <option>One Day Delivery</option>
                                 </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Length (cm)</label>
+                                <input type="number" id="length" placeholder="0.00" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Width (cm)</label>
+                                <input type="number" id="width" placeholder="0.00" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Height (cm)</label>
+                                <input type="number" id="height" placeholder="0.00" step="0.01" required>
                             </div>
                             <div class="form-group">
                                 <label>Weight (kg)</label>
                                 <input type="number" id="weight" placeholder="0.00" step="0.01" required>
                             </div>
+                        </div>
+
+                        <h3 style="margin-bottom: 15px; font-size: 16px; color: var(--primary); margin-top: 20px;">Order Amount</h3>
+                        <div class="grid">
                             <div class="form-group">
                                 <label>Amount (₹)</label>
                                 <input type="number" id="amount" placeholder="0.00" step="0.01" required>
@@ -494,12 +531,18 @@
                 customer_name: document.getElementById('customerName').value,
                 customer_email: document.getElementById('customerEmail').value,
                 customer_phone: document.getElementById('customerPhone').value,
+                receiver_name: document.getElementById('receiverName').value,
+                receiver_phone: document.getElementById('receiverPhone').value,
+                receiver_pincode: document.getElementById('receiverPincode').value,
                 pickup_address: document.getElementById('pickupAddress').value,
                 pickup_pincode: document.getElementById('customerPincode').value,
                 delivery_address: document.getElementById('deliveryAddress').value,
-                delivery_pincode: document.getElementById('customerPincode').value,
+                delivery_pincode: document.getElementById('receiverPincode').value,
                 service_type: document.getElementById('serviceType').value,
                 shipping_method: document.getElementById('shippingMethod').value,
+                package_length: parseFloat(document.getElementById('length').value),
+                package_width: parseFloat(document.getElementById('width').value),
+                package_height: parseFloat(document.getElementById('height').value),
                 package_weight: parseFloat(document.getElementById('weight').value),
                 order_amount: parseFloat(document.getElementById('amount').value),
                 payment_method: document.getElementById('paymentMethod').value,
